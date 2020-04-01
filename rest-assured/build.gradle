@@ -1,0 +1,70 @@
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+
+    // Apply the groovy plugin to also add support for Groovy (needed for Spock)
+    id 'groovy'
+
+    // Add in spring Boot support
+    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+}
+
+group = 'com.sainsburys.pd'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    jcenter()
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+ext['spock.version'] = '1.3'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    compileOnly 'org.projectlombok:lombok'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    // Use the awesome Spock testing and specification framework even with Java
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+    testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.5'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.tngtech.java:junit-dataprovider:1.13.1'
+
+    // Use Rest Assured for REST API testing, need rest-assure-all for Java 9+
+    testImplementation 'io.rest-assured:spring-mock-mvc:4.3.0'
+    testImplementation 'io.rest-assured:json-path:4.3.0'
+    testImplementation 'io.rest-assured:xml-path:4.3.0'
+    testImplementation 'io.rest-assured:rest-assured-all:4.3.0'
+}
+
+test {
+    // for the example, always run tests
+    outputs.upToDateWhen {false}
+
+    testLogging {
+        showStandardStreams = true
+    }
+}
