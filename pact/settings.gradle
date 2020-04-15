@@ -1,0 +1,4 @@
+rootProject.name = 'pact'
+include 'client'
+include 'server'
+

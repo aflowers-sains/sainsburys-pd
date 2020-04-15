@@ -1,0 +1,4 @@
+/pact/pacts/
+**/.gradle/*
+**/build/*
+**/target/*
