@@ -1,0 +1,40 @@
+image:
+  repository: 486979256902.dkr.ecr.eu-west-1.amazonaws.com/psr/fcrs
+  pullPolicy: Always
+
+# All applications need to exist in a namespace.
+namespace: psr
+
+replicaCount: 1
+
+nameOverride: "psr-fcrs"
+fullnameOverride: "psr-fcrs"
+
+# ClusterIP makes your application available from within the cluster only. You would need an ingress to
+# access this.
+service:
+  type: ClusterIP
+  port: 8080
+
+container:
+  port: 8080
+  healthcheckPort: 8081
+
+# Allow anything to ingress into port 8081. Necessary for the healthcheck.
+podIngress:
+- from:
+  ports:
+  - protocol: TCP
+    port: 8081
+
+prometheus:
+  scrape: "true"
+  port: 8081
+  path: "/actuator/prometheus"
+
+livenessProbeInitialDelay: 60
+readinessProbeInitialDelay: 60
+
+appendHeaders:
+  "x-forwarded-proto": "https"
+  "x-forwarded-port": "443"

@@ -1,0 +1,18 @@
+# To enable checkmarx scans of your repository, copy this file to checkmarx.yml and ensure the git url / project name
+# and notification emails are correct
+
+checkmarx:
+  team-id: '0d67874f-d6f5-4604-b791-bd1f06c67ce2'
+  project-name: 'psr-fcrs'
+  git-url: 'github.com/JSainsburyPLC/psr-fcrs.git'
+  git-ref: 'refs/heads/master'
+  notification-emails:
+    - '610d58cc.Sainsburys.co.uk@emea.teams.ms'
+  exclude-folders-pattern: null
+  exclude-files-pattern: null
+  tolerance:
+    high: 0
+    medium: null
+    low: null
+    info: null
+  preset-name: 'ASA-Default Express'

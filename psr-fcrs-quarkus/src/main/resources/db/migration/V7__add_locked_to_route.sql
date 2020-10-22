@@ -1,0 +1,1 @@
+ALTER TABLE fcrs.route_item ADD COLUMN locked BOOLEAN NOT NULL DEFAULT false

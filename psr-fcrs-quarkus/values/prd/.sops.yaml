@@ -1,0 +1,4 @@
+---
+creation_rules:
+# Encrypt with AWS KMS
+- kms: 'arn:aws:kms:eu-west-1:508208880112:key/049b2f3e-cb64-4fd1-bdbd-f34fb84e3f09'

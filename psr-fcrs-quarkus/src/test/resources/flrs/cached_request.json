@@ -1,0 +1,4 @@
+{
+  "query": "query($id: ID) { fulfilmentLocation(filter:{id: $id}) { ... on ClickAndCollect { attributes { fulfilledBy { ... on SainsburysStore { code name }}}}}}",
+  "variables": { "id" : "cached" }
+}

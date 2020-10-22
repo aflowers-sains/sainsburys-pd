@@ -1,0 +1,18 @@
+# Something like this would enable your application to respond to requests from outside the cluster.
+
+ingress:
+ hosts:
+   - psr-fcrs.dev.golf-noprod.js-devops.co.uk
+ path: /
+
+env:
+ - name: NEW_RELIC_APP_NAME
+   value: "psr-fcrs-dev"
+ - name: NEW_RELIC_LABELS
+   value: "product_area:PSR;costcentre:PD6773;product_name:fcrs;environment:dev;env_purpose:Test"
+ - name: ACTIVE_MQ_FULL_URL
+   value: "ssl://activemq-1.dev.application.golf:61617?verifyHostName=false"
+ - name: DATABASE_USER
+   value: "psr"
+ - name: DATABASE_URL
+   value: "jdbc:postgresql://psr-fcrs-rds-cluster-dev.cluster-cxfqjqr53ud7.eu-west-1.rds.amazonaws.com:5432/fcrs"

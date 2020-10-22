@@ -1,0 +1,21 @@
+import com.sainsburys.ci.*
+import com.sainsburys.ci.configuration.ApplicationPipelineConfig
+
+BUILD_IMAGE = 'adoptopenjdk/maven-openjdk11:latest'
+APP_NAME = 'psr-fcrs'
+NAMESPACE = 'psr'
+PROJECT_LANGUAGE = 'java'
+SERVICE_NOW_ID = 'ab55ff16dba2d4104b259d2bd39619db'
+
+Pipelines pipelines = new Pipelines()
+def pipelineConfig = new ApplicationPipelineConfig(
+    appName: APP_NAME,
+    buildImage: BUILD_IMAGE,
+    namespace: NAMESPACE,
+    projectLanguage: PROJECT_LANGUAGE,
+    sonarScan: false,
+    abortPriorBuild: true,
+    noOfCores: 4.0,
+    checkForChangesPaths: ['Jenkinsfile']
+)
+pipelines.applicationPipeline(pipelineConfig)

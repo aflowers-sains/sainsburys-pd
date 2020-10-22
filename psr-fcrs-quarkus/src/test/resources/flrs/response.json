@@ -1,0 +1,12 @@
+{
+  "data": {
+    "fulfilmentLocation": {
+      "attributes": {
+        "fulfilledBy": {
+          "code": "2320",
+          "name": "Herne Bay"
+        }
+      }
+    }
+  }
+}

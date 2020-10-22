@@ -1,0 +1,16 @@
+version: "2.1"
+
+services:
+  fcrs:
+    image: maven:3-amazoncorretto-11
+    command: mvn spring-boot:run
+    working_dir: /usr/src/mymaven
+    ports:
+      - 8880:8080
+      - 8081:8081
+    volumes:
+      - ${PWD}:/usr/src/mymaven
+      - ${HOME}/.m2:/root/.m2
+      - ${HOME}/.aws:/root/.aws
+    environment:
+      NEW_RELIC_AGENT_ENABLED: "false"

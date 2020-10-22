@@ -1,0 +1,31 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL95Dialect
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+  datasource:
+    url: jdbc:tc:postgresql:10.7:///databasename?TC_INITSCRIPT=init.sql
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: psr
+    password: tomato
+  flyway:
+    locations: classpath:db/migration
+    enabled: true
+
+management:
+  server:
+    port: ~
+
+psr:
+  fcrs:
+    redelivery:
+      delay: 1
+      multiplier: 1
+      max: 2
+
+flrs:
+  url: "http://localhost:8089"

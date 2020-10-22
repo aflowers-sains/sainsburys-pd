@@ -1,0 +1,69 @@
+server:
+  port: 8080
+  tomcat:
+    use-relative-redirects: true
+
+spring:
+  cache:
+    caffeine:
+      spec: expireAfterWrite=90m
+  main:
+    banner-mode: 'off'
+  activemq:
+    broker-url: ${ACTIVE_MQ_FULL_URL:tcp://localhost:61616}
+    user: ${ACTIVE_MQ_USER:fcrs_user}
+    password: ${ACTIVE_MQ_PASS:password}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL95Dialect
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+    open-in-view: false
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://db:5432/fcrs?useSSL=false}
+    driver-class-name: org.postgresql.Driver
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASSWORD:tomato}
+  flyway:
+    locations: classpath:db/migration
+    enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    layout: BaseLayout
+
+management:
+  server:
+    port: 8081
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    enable:
+      jvm: false
+      tomcat: false
+      system: false
+      process: false
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  health:
+    jms:
+      enabled: true
+
+flrs:
+  url: ${FLRS_URL:http://fulfilment-location-reference-service.manchester.svc.cluster.local:8080}
+
+fcrs:
+  scheduling:
+    cron: ${SCHEDULED_TASK_CRON:0 0 6 * * *}
+    lockAtMost: ${SCHEDULED_TASK_MAX_LOCK_DURATION:PT30S}
