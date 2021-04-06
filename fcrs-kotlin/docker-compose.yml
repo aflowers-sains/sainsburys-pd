@@ -1,0 +1,33 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:10.7
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: tomato
+      POSTGRES_USER: postgres
+      POSTGRES_DB: fcrs
+    volumes:
+      - ./docker/db:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+
+  flrs:
+    image: rodolpheche/wiremock:2.26.3
+    volumes:
+      - ${PWD}/docker/flrs-stub:/home/wiremock
+    ports:
+      - "2320:8080"
+
+  mq:
+    image: "webcenter/activemq"
+    ports:
+      - 8161:8161
+      - 61616:61616
+    environment:
+      ACTIVEMQ_ENABLED_AUTH: "true"
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: "admin"
+      ACTIVEMQ_ADMIN_PASSWORD: "secret"
+      ACTIVEMQ_STATIC_TOPICS: "VirtualTopic.psr.flrs.v1.updated"
