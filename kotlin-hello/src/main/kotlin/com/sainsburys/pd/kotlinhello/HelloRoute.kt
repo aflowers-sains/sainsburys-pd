@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
+import java.time.Duration
 
 @Configuration
 class HelloRoute {
@@ -15,6 +16,12 @@ class HelloRoute {
                 val name: String = request.pathVariable("name")
                 ServerResponse.ok().bodyValue("Hello router $name")
             }
+
+            GET("/waitingrouter/{name}") { request ->
+                val name: String = request.pathVariable("name")
+                ServerResponse.ok().bodyValue("Waiting router $name").delayElement(Duration.ofSeconds(10))
+            }
+
         }
     }
 }

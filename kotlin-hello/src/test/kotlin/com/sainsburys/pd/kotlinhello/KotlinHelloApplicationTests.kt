@@ -28,4 +28,15 @@ class KotlinHelloApplicationTests(@Autowired val restTemplate: TestRestTemplate)
         assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(entity.body).contains("Hello router kotlin")
     }
+
+    @Test
+    fun `Simple waiting hello REST router answers requests`() {
+        val start = System.currentTimeMillis()
+        val entity = restTemplate.getForEntity<String>("/waitingrouter/waited")
+        val end = System.currentTimeMillis()
+
+        assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(entity.body).contains("Waiting router waited")
+        assertThat(end - start).isGreaterThan(9000)
+    }
 }
