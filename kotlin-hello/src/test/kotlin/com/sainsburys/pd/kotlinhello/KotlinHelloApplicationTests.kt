@@ -22,4 +22,10 @@ class KotlinHelloApplicationTests(@Autowired val restTemplate: TestRestTemplate)
         assertThat(entity.body).contains("Hello kotlin")
     }
 
+    @Test
+    fun `Simple hello REST router answers requests`() {
+        val entity = restTemplate.getForEntity<String>("/hellorouter/kotlin")
+        assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(entity.body).contains("Hello router kotlin")
+    }
 }
