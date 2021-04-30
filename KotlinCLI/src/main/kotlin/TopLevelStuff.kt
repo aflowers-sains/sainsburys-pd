@@ -1,5 +1,6 @@
 fun main() {
     topLevelMethod()
+    anotherTopLevelMethod()
 }
 
 fun topLevelMethod() {
@@ -10,3 +11,7 @@ fun topLevelMethod() {
 fun getName(): String {
     return "World"
 }
+
+fun anotherTopLevelMethod() = println("${simpleNameFunction()}")
+
+fun simpleNameFunction(): String = "Hello There"
