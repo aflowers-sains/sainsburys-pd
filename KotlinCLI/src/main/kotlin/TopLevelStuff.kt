@@ -1,6 +1,7 @@
 fun main() {
     topLevelMethod()
     anotherTopLevelMethod()
+    anotherTopLevelMethodWithParam(::simpleNameFunctionAsParam)
 }
 
 fun topLevelMethod() {
@@ -15,3 +16,7 @@ fun getName(): String {
 fun anotherTopLevelMethod() = println("${simpleNameFunction()}")
 
 fun simpleNameFunction(): String = "Hello There"
+
+fun anotherTopLevelMethodWithParam(func: () -> String) = println("${func()}")
+
+fun simpleNameFunctionAsParam(): String = "Hello There from a function as a param"
