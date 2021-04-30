@@ -1,4 +1,12 @@
+import java.time.Instant
+
 object anObjectType {
+    val theval: String = Instant.now().toString();
+
+    fun hello() {
+        println("val == ${theval}")
+    }
+
     fun doSomeStuff(data: Int) {
         println("doing some stuff in a static context")
         println("false == ${couldbenull(false)?.dootherstuff()?.data1}")
@@ -24,4 +32,13 @@ object anObjectType {
         println("extended mydata ${data1}")
         return this
     }
+}
+
+
+fun main() {
+    val one = anObjectType
+    val two = anObjectType
+
+    one.hello()
+    two.hello()
 }
