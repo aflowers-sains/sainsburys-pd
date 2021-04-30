@@ -8,11 +8,16 @@ object anObjectType {
     }
 
     private fun couldbenull(well: Boolean): MyData? {
-        if (well) {
-            return MyData("1", 1)
-        } else {
-            return null
+        return when {
+            well == true -> MyData("1", 1)
+            well == false -> null
+            else -> null
         }
+//        if (well) {
+//            return MyData("1", 1)
+//        } else {
+//            return null
+//        }
     }
 
     private fun MyData.dootherstuff(): MyData {
