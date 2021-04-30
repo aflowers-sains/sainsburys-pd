@@ -11,9 +11,11 @@ fun CoroutineScope.produceNumbers() = produce<Int> {
 }
 
 fun main(args: Array<String>) = runBlocking {
-    val producer = produceNumbers()
-
-    reader(producer)
+    anObjectType.doSomeStuff(11)
+    
+//    val producer = produceNumbers()
+//
+//    reader(producer)
 
 //    val result = AtomicLong()
 //
