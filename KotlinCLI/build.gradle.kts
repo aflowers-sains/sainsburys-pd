@@ -37,7 +37,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform {
-        includeEngines("spek2")
+        //includeEngines("spek2")
     }
 }
 
