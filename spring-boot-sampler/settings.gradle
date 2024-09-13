@@ -1,0 +1,11 @@
+rootProject.name = 'spring-boot-sampler'
+
+include 'clients'
+include 'dbaudit'
+include 'parameters'
+include 'policies'
+include 'serviceregistry'
+include 'quotes'
+include 'secured'
+include 'jwtsecured'
+

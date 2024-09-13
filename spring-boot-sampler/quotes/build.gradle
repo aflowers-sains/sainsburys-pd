@@ -1,0 +1,45 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'uk.co.sainsburys'
+version = '0.0.1-SNAPSHOT'
+
+ext {
+	springCloudAwsVersion='3.0.1'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:${springCloudAwsVersion}")
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
+	implementation 'software.amazon.awssdk:sso:2.20.76'
+	implementation 'software.amazon.awssdk:sts:2.20.76'
+
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation "io.micrometer:micrometer-tracing-bridge-otel"
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
