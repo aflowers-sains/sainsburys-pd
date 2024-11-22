@@ -1,12 +1,11 @@
 package com.sainsburys.pd.controller
 
 import io.restassured.RestAssured
-import org.junit.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,7 +26,6 @@ class AdditionControllerITSpec extends Specification {
     }
 
     @Unroll("Adding #first to #second and expecting #answer")
-    @Test
     def "can add two numbers together"() {
         given: "two integers"
         def restAssuredGiven = given().queryParam("first", first).queryParam("second", second)
@@ -49,7 +47,6 @@ class AdditionControllerITSpec extends Specification {
     }
 
     @Unroll("Adding #first to #second and expecting #answer using TestRestTemplate")
-    @Test
     def "can add two numbers together using TestRestTemplate"() {
         given: "two integers"
 

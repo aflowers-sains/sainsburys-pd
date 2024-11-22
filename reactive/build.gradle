@@ -1,8 +1,8 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.3.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id("org.springframework.boot") version "3.4.0"
+	id("io.spring.dependency-management") version "1.1.6"
 	id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
 }
 
 group = 'com.sainsburys.pd'
@@ -38,14 +38,4 @@ dependencies {
 
 test {
 	useJUnitPlatform()
-}
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 }

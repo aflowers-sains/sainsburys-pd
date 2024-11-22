@@ -64,15 +64,6 @@ dependencies {
 group = 'com.sainsburys.psr.fcrs'
 version = '0.0.53-SNAPSHOT'
 description = 'psr-fcrs'
-sourceCompatibility = '1.8'
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

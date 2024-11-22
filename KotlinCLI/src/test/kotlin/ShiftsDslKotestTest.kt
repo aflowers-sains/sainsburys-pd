@@ -22,7 +22,7 @@ class ShiftsDslKotestTest : BehaviorSpec({
         Then("Retrieving the shifts") {
             result.size shouldBe 2
             result[0].id shouldBe "shift 1"
-            result[0].deliveries.size shouldBe 1
+            result[0].deliveries.size shouldBe 10
             result[1].id shouldBe "shift 2"
             result[1].deliveries.size shouldBe 0
         }

@@ -1,2 +1,2 @@
-rootProject.name = "dsldemo"
+rootProject.name = "kotlin_dsl"
 

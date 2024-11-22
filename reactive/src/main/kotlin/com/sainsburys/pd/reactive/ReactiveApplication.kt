@@ -6,7 +6,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
-import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.r2dbc.core.DatabaseClient
 import reactor.core.publisher.Flux
 
 @SpringBootApplication
@@ -14,7 +14,7 @@ open class ReactiveApplication {
     @Bean
     open fun init(repository: NameMappingRepository, dbClient: DatabaseClient) = ApplicationRunner {
         try {
-            val initDb = dbClient.execute("CREATE TABLE MAPPING(name varchar(50), mapping varchar(50));")
+            val initDb = dbClient.sql("CREATE TABLE MAPPING(name varchar(50), mapping varchar(50));")
 
             val saveAll = Flux.just(Mapping("Andy", "dev"), Mapping("andy", "dev")).flatMap(repository::save)
 
