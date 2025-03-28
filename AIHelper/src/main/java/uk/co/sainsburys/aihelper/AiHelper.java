@@ -11,4 +11,8 @@ public class AiHelper {
     private void AIAssistedLoop() {
         IntStream.range(0, 10_000_000).forEach(i -> System.out.println("Loop iteration: " + i));
     }
+
+    public String hellowrold() {
+        return "Hello World!";
+    }
 }
