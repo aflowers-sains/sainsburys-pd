@@ -12,7 +12,7 @@ public class AiHelper {
         IntStream.range(0, 10_000_000).forEach(i -> System.out.println("Loop iteration: " + i));
     }
 
-    public String hellowrold() {
+    public String helloWorld() {
         return "Hello World!";
     }
 }
