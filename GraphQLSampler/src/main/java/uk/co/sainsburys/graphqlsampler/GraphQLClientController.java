@@ -19,14 +19,16 @@ public class GraphQLClientController {
   private final GraphQLClient graphQLClient;
 
   public GraphQLClientController(RestClient.Builder builder) {
-    this.graphQLClient = new RestClientGraphQLClient(builder.baseUrl("https://psr-flrs.int.dev.jspaas.uk/graphql").build());
+    this.graphQLClient = new RestClientGraphQLClient(builder.baseUrl("https://psr-flrs.int.stg.jspaas.uk/graphql").build());
   }
 
   @GetMapping("/")
   public List<SainsburysStore> retrieveStores() {
 
-    GraphQLQueryRequest graphQLQueryRequest = new GraphQLQueryRequest(new SainsburysStoresGraphQLQuery.Builder().build(),
-        new SainsburysStoresProjectionRoot<>().edges().node().name().code().id());
+    GraphQLQueryRequest graphQLQueryRequest = new GraphQLQueryRequest(SainsburysStoresGraphQLQuery.newRequest().build(),
+        new SainsburysStoresProjectionRoot<>().edges().node()
+            .name().code().id().placeId()
+            .attributes().collectionPickingCapacity());
 
     String query = graphQLQueryRequest.serialize();
     GraphQLResponse response = graphQLClient.executeQuery(query);

@@ -1,8 +1,8 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.6"
-    id("io.spring.dependency-management") version "1.1.6"
-    id("com.netflix.dgs.codegen") version "6.2.1"
+    id("org.springframework.boot") version "3.5.3"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("com.netflix.dgs.codegen") version "8.1.0"
 }
 
 group = "uk.co.sainsburys"
@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 }
 
-extra["netflixDgsVersion"] = "9.1.3"
+extra["netflixDgsVersion"] = "10.2.1"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -36,9 +36,9 @@ dependencyManagement {
 }
 
 tasks.generateJava {
-    schemaPaths.add("${projectDir}/src/main/resources/graphql-client")
     packageName = "uk.co.sainsburys.graphqlsampler.codegen"
-    generateClient = true
+    generateClientv2 = true
+    trackInputFieldSet = true
     typeMapping.put("Time", "java.time.LocalTime")
     typeMapping.put("Date", "java.time.LocalDate")
 }

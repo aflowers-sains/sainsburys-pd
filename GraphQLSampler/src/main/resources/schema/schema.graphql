@@ -1,0 +1,1779 @@
+directive @auth(permission: String) on OBJECT | FIELD_DEFINITION
+
+directive @cacheControl(maxAge: Int, scope: CacheControlScope, inheritMaxAge: Boolean) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+directive @requiresAttribution on FIELD_DEFINITION
+
+directive @testOnly on FIELD_DEFINITION
+
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+interface AttributeChange {
+  id: ID
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+"""
+This will return the information  about the current attribute change taking effect on the given date.
+"""
+type CurrentChange {
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  id: ID!
+  isPermanent: Boolean!
+}
+
+type IntChange implements AttributeChange {
+  id: ID
+  value: Int!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type IntWithChanges {
+  value: Int!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [IntChange!]!
+}
+
+type MaybeIntChange implements AttributeChange {
+  id: ID
+  value: Int
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type MaybeIntWithChanges {
+  value: Int
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [MaybeIntChange!]!
+}
+
+type BooleanChange implements AttributeChange {
+  id: ID
+  value: Boolean!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type BooleanWithChanges {
+  value: Boolean!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [BooleanChange!]!
+}
+
+interface ChangeLog {
+  id: ID!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  deletedAt: Date
+  deletedBy: String
+  isUndone: Boolean!
+}
+
+type IntChangeLog implements ChangeLog {
+  id: ID!
+  value: Int!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type MaybeIntChangeLog implements ChangeLog {
+  id: ID!
+  value: Int
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type StringChangeLog implements ChangeLog {
+  id: ID!
+  value: String!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type BooleanChangeLog implements ChangeLog {
+  id: ID!
+  value: Boolean!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+enum AttributeEventType {
+  CREATED
+  MODIFIED
+  DELETED
+  UNDONE
+}
+
+interface AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type BooleanChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: Boolean!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type IntChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: Int!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type MaybeIntChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: Int
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type Mutation {
+  """Deletes an attribute change"""
+  deleteAttributeChange(input: DeleteAttributeChangeInput!): DeleteAttributeChangePayload
+
+  """Updates alcohol restricted departure enabled for a store"""
+  updateAlcoholRestrictedDepartureEnabled(
+    input: UpdateAlcoholRestrictedDepartureEnabledInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateAlcoholRestrictedDepartureEnabledMutationPayload
+
+  """Updates alcohol buffer time for a given location."""
+  updateAlcoholBufferTime(
+    input: UpdateAlcoholBufferTimeInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateAlcoholBufferTimeMutationPayload
+
+  """Updates the GOL yard location coordinates for a store"""
+  updateGolYardLocation(
+    input: UpdateGolYardLocationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateGolYardLocationMutationPayload
+
+  """Updates the load time for a store"""
+  updateLoadTime(
+    input: UpdateLoadTimeInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateLoadTimeMutationPayload
+
+  """Updates the overweight allowance percentage for a store"""
+  updateOverweightAllowancePercentage(
+    input: UpdateOverweightAllowancePercentageInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateOverweightAllowancePercentageMutationPayload
+
+  """Updates the road speed percentage for a store"""
+  updateRoadSpeedPercentage(
+    input: UpdateRoadSpeedPercentageInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateRoadSpeedPercentageMutationPayload
+
+  """Updates the routing provider for a store"""
+  updateRoutingProvider(
+    input: UpdateRoutingProviderInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateRoutingProviderMutationPayload
+
+  """Updates the payload of vehicles for a store"""
+  updateVehiclePayloadKilograms(
+    input: UpdateVehiclePayloadKilogramsInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateVehiclePayloadKilogramsMutationPayload
+
+  """Updates same day enabled for a store"""
+  updateSameDayEnabled(
+    input: UpdateSameDayEnabledInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateSameDayEnabledMutationPayload
+
+  """Updates the roads that vehicles avoid for a store"""
+  updateRoadsAvoided(
+    input: UpdateRoadsAvoidedInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateRoadsAvoidedMutationPayload
+
+  """Updates location enabled for a store"""
+  updateLocationEnabled(
+    input: UpdateLocationEnabledInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateLocationEnabledMutationPayload
+
+  """Updates vehicle range miles for a store"""
+  updateVehicleRangeMiles(
+    input: UpdateVehicleRangeMilesInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateVehicleRangeMilesMutationPayload
+
+  """Updates max vehicle gross weight kilograms for a store"""
+  updateMaxVehicleGrossWeight(
+    input: UpdateMaxVehicleGrossWeightInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateMaxVehicleGrossWeightMutationPayload
+
+  """Create a test store. Pre-production environments only."""
+  createTestStore: SainsburysStore
+
+  """Delete a test store. Pre-production environments only."""
+  deleteTestStore(id: ID): Boolean
+
+  """Delete all test stores. Pre-production environments only."""
+  deleteAllTestStores: Boolean
+
+  """Deletes an attribute change"""
+  undoAttributeChange(input: UndoAttributeChangeInput!): UndoAttributeChangePayload
+
+  """Updates collection provider for a click and collect location"""
+  updateCacCollectionProvider(
+    input: UpdateCacCollectionProviderMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacCollectionProviderMutationPayload
+  updateCacSameDayEnabled(
+    input: UpdateCacSameDayEnabledMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacSameDayEnabledMutationPayload
+
+  """Updates opening hours for week for a given location."""
+  updateCacOpeningHoursForWeek(
+    input: UpdateCacOpeningHoursForWeekInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacOpeningHoursForWeekMutationPayload
+
+  """Updates default slot capacity for a given location."""
+  updateCacDefaultSlotCapacity(
+    input: UpdateCacDefaultSlotCapacityMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacDefaultSlotCapacityMutationPayload
+
+  """Updates alcohol opening hours for a given location."""
+  updateAlcoholLicensingHours(input: UpdateAlcoholLicensingHoursInput!): AlcoholLicensingHoursMutationPayload
+
+  """Updates order picking capacities for a given location."""
+  updateOrderPickingCapacities(input: UpdateOrderPickingCapacityInput!): OrderPickingCapacityMutationPayload
+
+  """Updates order picking capacities for multiple locations."""
+  updateOrderPickingCapacitiesInBulk(inputs: [UpdateOrderPickingCapacityInput!]!): [OrderPickingCapacityMutationPayload]
+
+  """Updates collection picking capacities for a given location."""
+  updateCollectionPickingCapacities(input: UpdateCollectionPickingCapacityInput!): CollectionPickingCapacityMutationPayload
+
+  """Updates collection picking capacities for multiple locations."""
+  updateCollectionPickingCapacitiesInBulk(inputs: [UpdateCollectionPickingCapacityInput!]!): [CollectionPickingCapacityMutationPayload]
+}
+
+type DeleteAttributeChangePayload {
+  success: Boolean!
+}
+
+input DeleteAttributeChangeInput {
+  """Attribute change id"""
+  id: ID!
+}
+
+input UpdateRoadSpeedPercentageInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The road speed percentage"""
+  roadSpeedPercentage: Int!
+
+  """Date when the road speed percentage will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the road speed percentage will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+"""Base response from an attribute mutation"""
+interface UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: ChangeLog!
+}
+
+"""Response returned from a road speed percentage update mutation"""
+type UpdateRoadSpeedPercentageMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+input UpdateGolYardLocationInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The GOL yard location coordinates"""
+  golYardLocation: GolYardLocationInput!
+
+  """Date when the GOL yard location will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the GOL yard location will no longer be applicable"""
+  effectiveTo: Date
+}
+
+input GolYardLocationInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+"""Response returned from a GOL yard location coordinates update mutation"""
+type UpdateGolYardLocationMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: GolYardLocationChangeLog!
+}
+
+input UpdateRoutingProviderInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The routing provider for the store"""
+  routingProvider: RoutingProvider!
+
+  """Date when the routing provider will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the routing provider will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a routing provider update"""
+type UpdateRoutingProviderMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: RoutingProviderChangeLog!
+}
+
+"""Input type for mutating road types vehicles avoid"""
+input UpdateRoadsAvoidedInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The road types vehicles avoid"""
+  roadsAvoided: [RoadType!]!
+
+  """Date when the vehicle payload will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the vehicle payload will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a roads avoided update"""
+type UpdateRoadsAvoidedMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: RoadTypeChangeLog!
+}
+
+"""Input type for mutating alcohol restricted departure enabled"""
+input UpdateAlcoholRestrictedDepartureEnabledInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """Flag to enable alcohol restricted departure"""
+  alcoholRestrictedDepartureEnabled: Boolean!
+
+  """Date when alcohol restricted departure will be enabled from"""
+  effectiveFrom: Date!
+
+  """Optional date when the restriction will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a alcohol restricted departure enabled update"""
+type UpdateAlcoholRestrictedDepartureEnabledMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+input UpdateLoadTimeInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The load time in minutes"""
+  loadTime: Int!
+
+  """Date when the load time will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the load time will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a load time update mutation"""
+type UpdateLoadTimeMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating location enabled"""
+input UpdateLocationEnabledInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """Flag to enable location"""
+  locationEnabled: Boolean!
+
+  """Date when location will be enabled from"""
+  effectiveFrom: Date!
+
+  """Optional date when location no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a location enabled update"""
+type UpdateLocationEnabledMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+"""Input type for mutating same day enabled"""
+input UpdateSameDayEnabledInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """Flag to enable same day"""
+  sameDayEnabled: Boolean!
+
+  """Date when same day will be enabled from"""
+  effectiveFrom: Date!
+
+  """Optional date when same day no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a same day enabled update"""
+type UpdateSameDayEnabledMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+"""Input type for mutating vehicle payload"""
+input UpdateVehiclePayloadKilogramsInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The payload for vehicles."""
+  vehiclePayloadKilograms: Int!
+
+  """Date when the vehicle payload will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the vehicle payload will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a vehicle payload update"""
+type UpdateVehiclePayloadKilogramsMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: MaybeIntChangeLog!
+}
+
+"""Input type for mutating vehicle range in miles"""
+input UpdateVehicleRangeMilesInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """Vehicle range in miles"""
+  vehicleRangeMiles: Int!
+
+  """Date when range will be applied from"""
+  effectiveFrom: Date!
+
+  """Optional date when range will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a vehicle range update"""
+type UpdateVehicleRangeMilesMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating alcohol buffer time"""
+input UpdateAlcoholBufferTimeInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The alcohol buffer in minutes"""
+  alcoholBufferTime: Int!
+
+  """Date when the alcohol buffer time will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the alcohol buffer time will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateAlcoholBufferTimeMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+input UpdateOverweightAllowancePercentageInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The overweight allowance in percentages"""
+  overweightAllowancePercentage: Int!
+
+  """Date when the overweight allowance percentage will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the overweight allowance percentage will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+"""
+Response returned from an overweight allowance percentage update mutation
+"""
+type UpdateOverweightAllowancePercentageMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating vehicle range in miles"""
+input UpdateMaxVehicleGrossWeightInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """Vehicle range in miles"""
+  maxVehicleGrossWeight: Int!
+
+  """Date when range will be applied from"""
+  effectiveFrom: Date!
+
+  """Optional date when range will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a vehicle range update"""
+type UpdateMaxVehicleGrossWeightMutationPayload implements UpdateAttributeMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+type SainsburysStoreAttributes implements AttributeLink {
+  """The latitude and longitude coordinates of a store for a particular day"""
+  golYardLocation: GolYardLocation
+
+  """The routing provider for the store for a particular day."""
+  routingProvider: RoutingProvider
+
+  """The order picking capacity for the store for a particular day."""
+  orderPickingCapacity: Int
+
+  """
+  The order picking capacity for the store for a particular sainsbury's week
+  """
+  orderPickingCapacityForWeek: [DayOrderPickingCapacity!]
+
+  """The collectionpicking capacity for the store for a particular day."""
+  collectionPickingCapacity: Int
+
+  """
+  The collection picking capacity for the store for a particular sainsbury's week
+  """
+  collectionPickingCapacityForWeek: [DayCollectionPickingCapacity!]
+
+  """The alcohol licensing hours for this date"""
+  alcoholLicensingHours: DayTimeWindow
+
+  """The alcohol licensing hours for the whole of this Sainsbury's week"""
+  alcoholLicensingHoursForWeek: [DayTimeWindow]
+
+  """
+  The average loading time of a store - the time it takes a van to load a set of deliveries. Unit is minutes
+  """
+  loadTime: Int
+
+  """
+  The road speed percentage, used to modify road speeds to slow down vans.
+  """
+  roadSpeedPercentage: Int
+
+  """The payload for vehicles."""
+  vehiclePayloadKilograms: Int
+
+  """The flag to check if same day is enabled for a particular day."""
+  sameDayEnabled: Boolean
+
+  """
+  The flag to check if alcohol restricted departure is enabled for a particular day.
+  """
+  alcoholRestrictedDepartureEnabled: Boolean
+
+  """
+  The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours. Unit is minutes
+  """
+  alcoholBufferTime: Int
+
+  """
+  The overweight allowance percentage, adds additional payload on top of minimum payload
+  """
+  overweightAllowancePercentage: Int
+
+  """Specifies the road types vehicles void when conducting deliveries"""
+  roadsAvoided: [RoadType!]
+
+  """
+  The flag to indicate whether a store is open or closed for a particular day
+  """
+  locationEnabled: Boolean
+
+  """The range of vehicles in this store (in miles)"""
+  vehicleRangeMiles: Int
+
+  """The max gross weight of vehicles in this store (in kilograms)"""
+  maxVehicleGrossWeight: Int
+  locationId: String!
+  date: Date
+}
+
+type GolYardLocation {
+  latitude: Float!
+  longitude: Float!
+}
+
+enum RoutingProvider {
+  """Plan Schedule Route"""
+  PSR
+
+  """Oracle Real-time Scheduler"""
+  ORS
+}
+
+type SainsburysStoreAttributesWithChanges implements AttributeLink {
+  """The latitude and longitude coordinates of a store for a particular day"""
+  golYardLocation: GolYardLocationWithChanges
+
+  """The routing provider for the store for a particular day."""
+  routingProvider: RoutingProviderWithChanges
+
+  """The load time for the store for a particular day."""
+  loadTime: IntWithChanges
+
+  """
+  The road speed percentage, used to modify road speeds to slow down vans.
+  """
+  roadSpeedPercentage: IntWithChanges
+
+  """The payload for vehicles."""
+  vehiclePayloadKilograms: MaybeIntWithChanges
+
+  """The flag to check if same day is enabled for a particular day."""
+  sameDayEnabled: BooleanWithChanges
+
+  """
+  The flag to check if alcohol restricted departure is enabled for a particular day.
+  """
+  alcoholRestrictedDepartureEnabled: BooleanWithChanges
+
+  """
+  The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours
+  """
+  alcoholBufferTime: IntWithChanges
+
+  """
+  The overweight allowance percentage, adds additional payload on top of minimum payload
+  """
+  overweightAllowancePercentage: IntWithChanges
+
+  """The road types vehicles avoid"""
+  roadsAvoided: RoadTypeWithChanges
+
+  """
+  The flag to indicate whether a store is open or closed for a particular day
+  """
+  locationEnabled: BooleanWithChanges
+
+  """The range of vehicles in this store (in miles)"""
+  vehicleRangeMiles: IntWithChanges
+
+  """The max gross weight of vehicles in this store (in kilograms)"""
+  maxVehicleGrossWeight: IntWithChanges
+  locationId: String!
+  date: Date
+}
+
+type GolYardLocationChange implements AttributeChange {
+  id: ID
+  value: GolYardLocation
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type GolYardLocationWithChanges {
+  value: GolYardLocation
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [GolYardLocationChange!]!
+}
+
+type RoutingProviderChange implements AttributeChange {
+  id: ID
+  value: RoutingProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type RoutingProviderWithChanges {
+  value: RoutingProvider!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [RoutingProviderChange!]!
+}
+
+type RoadTypeChange implements AttributeChange {
+  id: ID
+  value: [RoadType!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type RoadTypeWithChanges {
+  value: [RoadType!]!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [RoadTypeChange!]!
+}
+
+"""Log of all changes made to store attributes"""
+type SainsburysStoreAttributesChangeLog implements AttributeLink {
+  """Changelog for the GOL Yard Location of the store"""
+  golYardLocation: [GolYardLocationChangeLog!]
+
+  """Changelog for the routing provider of the store"""
+  routingProvider: [RoutingProviderChangeLog!]
+
+  """Changelog for the load time of the store"""
+  loadTime: [IntChangeLog!]
+
+  """Changelog for the road speed percentage of the store"""
+  roadSpeedPercentage: [IntChangeLog!]
+
+  """Changelog for the vehicle payload of the store"""
+  vehiclePayloadKilograms: [MaybeIntChangeLog!]
+
+  """Changelog for the alcohol buffer time of the store"""
+  alcoholBufferTime: [IntChangeLog!]
+
+  """Changelog for the alcohol restricted departure flag for the store"""
+  alcoholRestrictedDepartureEnabled: [BooleanChangeLog!]
+
+  """Changelog for the overweight allowance percentage for the store"""
+  overweightAllowancePercentage: [IntChangeLog!]
+
+  """Changelog for road types vehicles avoid for the store"""
+  roadsAvoided: [RoadTypeChangeLog!]
+
+  """Changelog for the same day enabled flag for the store"""
+  sameDayEnabled: [BooleanChangeLog!]
+
+  """Changelog for the location enabled flag for the store"""
+  locationEnabled: [BooleanChangeLog!]
+
+  """Changelog for the vehicle range in miles for the store"""
+  vehicleRangeMiles: [IntChangeLog!]
+
+  """Changelog for the max vehicle gross weight in kilograms for the store"""
+  maxVehicleGrossWeight: [IntChangeLog!]
+  locationId: String!
+  date: Date
+}
+
+type GolYardLocationChangeLog implements ChangeLog {
+  id: ID!
+  value: GolYardLocation
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  deletedAt: Date
+  deletedBy: String
+  isUndone: Boolean!
+}
+
+type RoutingProviderChangeLog implements ChangeLog {
+  id: ID!
+  value: RoutingProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  deletedAt: Date
+  deletedBy: String
+  isUndone: Boolean!
+}
+
+type RoadTypeChangeLog implements ChangeLog {
+  id: ID!
+  value: [RoadType!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  deletedAt: Date
+  deletedBy: String
+  isUndone: Boolean!
+}
+
+type GolYardLocationChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: GolYardLocation!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type RoutingProviderChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: RoutingProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type RoadTypeChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: [RoadType!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+"""Log of all changes made to store attributes"""
+type SainsburysStoreAttributesEventHistory implements AttributeLink {
+  """Change event history for the load time of the store"""
+  loadTime: [IntChangeEvent!]
+
+  """Change event history for the routing provider of the store"""
+  routingProvider: [RoutingProviderChangeEvent!]
+
+  """Change event history for the alcohol buffer time of the store"""
+  alcoholBufferTime: [IntChangeEvent!]
+
+  """Change event history for the road speed percentage of the store"""
+  roadSpeedPercentage: [IntChangeEvent!]
+
+  """Change event history for the vehicle payload of the store"""
+  vehiclePayloadKilograms: [MaybeIntChangeEvent!]
+
+  """Change event history for the GOL yard location of the store"""
+  golYardLocation: [GolYardLocationChangeEvent!]
+
+  """
+  Change event history for the alcohol restricted departure flag of the store
+  """
+  alcoholRestrictedDepartureEnabled: [BooleanChangeEvent!]
+
+  """
+  Change event history for the overweight allowance percentage of the store
+  """
+  overweightAllowancePercentage: [IntChangeEvent!]
+
+  """Change event history for road types vehicles avoid of the store"""
+  roadsAvoided: [RoadTypeChangeEvent!]
+
+  """Change event history for the same day enabled flag of the store"""
+  sameDayEnabled: [BooleanChangeEvent!]
+
+  """Change event history for the location enabled flag of the store"""
+  locationEnabled: [BooleanChangeEvent!]
+
+  """Change event history for the vehicle range of the store"""
+  vehicleRangeMiles: [IntChangeEvent!]
+
+  """Change event history for the max vehicle gross weight of the store"""
+  maxVehicleGrossWeight: [IntChangeEvent!]
+  locationId: String!
+  date: Date
+}
+
+"""The order picking capacity for a given date"""
+type DayOrderPickingCapacity {
+  date: Date!
+  dayOfWeek: DayOfWeek!
+  orderPickingCapacity: Int!
+}
+
+type DayCollectionPickingCapacity {
+  date: Date!
+  dayOfWeek: DayOfWeek!
+  collectionPickingCapacity: Int!
+}
+
+enum StoreAttributeNames {
+  ALCOHOL_BUFFER_TIME
+  ALCOHOL_RESTRICTED_DEPARTURE_ENABLED
+  ALCOHOL_LICENSING_HOURS
+  GOL_YARD_LOCATION
+  LOAD_TIME
+  LOCATION_ENABLED
+  OVERWEIGHT_ALLOWANCE_PERCENTAGE
+  ROAD_SPEED_PERCENTAGE
+  ROADS_AVOIDED
+  ROUTING_PROVIDER
+  SAME_DAY_ENABLED
+  VEHICLE_PAYLOAD_KILOGRAMS
+  VEHICLE_RANGE_MILES
+  ORDER_PICKING_CAPACITY
+  COLLECTION_PICKING_CAPACITY
+  MAX_VEHICLE_GROSS_WEIGHT
+}
+
+type UndoAttributeChangePayload {
+  success: Boolean!
+}
+
+input UndoAttributeChangeInput {
+  """Attribute change id"""
+  id: ID!
+}
+
+type Query {
+  viewer: Viewer
+  zones: [Zone!]!
+
+  """Get a Click and Collect location"""
+  clickAndCollect(filter: ClickAndCollectFilter!): ClickAndCollect
+
+  """
+  Get all Click and Collect locations, optionally restricted by a number of filters
+  """
+  clickAndCollects(
+    """BUG: nullable items will cause errors"""
+    filters: [ClickAndCollectFilter]
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): ClickAndCollectConnection!
+
+  """Search for a Click and Collect Location by string token"""
+  searchForClickAndCollect(
+    searchTerm: String!
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): ClickAndCollectConnection
+
+  """Get a Sainsbury's Store"""
+  sainsburysStore(filter: SainsburysStoreFilter!): SainsburysStore
+
+  """
+  Get all Sainsbury's Stores, optionally restricted by a number of filters
+  """
+  sainsburysStores(
+    filters: [SainsburysStoreFilter]
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): SainsburysStoreConnection!
+
+  """Search for a Sainsbury's Store by string token"""
+  searchForSainsburysStore(
+    searchTerm: String!
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): SainsburysStoreConnection!
+
+  """Get a Fulfilment Location by a filter"""
+  fulfilmentLocation(filter: FulfilmentLocationFilter!): FulfilmentLocation
+
+  """
+  Get all Fulfilment Locations, optionally restricted by a number of filters
+  """
+  fulfilmentLocations(
+    """BUG: nullable items will cause errors"""
+    filters: [FulfilmentLocationFilter]
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): FulfilmentLocationConnection
+
+  """
+  Fuzzy search for Fulfilment Locations on conjoined:
+  * code
+  * name
+  
+  For example:
+  "Badger" or "666"
+  """
+  searchForFulfilmentLocation(
+    searchTerm: String!
+
+    """Not implemented"""
+    after: String
+
+    """Not implemented"""
+    before: String
+
+    """Not implemented"""
+    first: Int
+
+    """Not implemented"""
+    last: Int
+  ): FulfilmentLocationConnection
+}
+
+"""Info about the currently logged in user"""
+type Viewer {
+  name: String! @deprecated(reason: "FLRS can no longer be authorized through a user login")
+  oid: String! @deprecated(reason: "FLRS can no longer be authorized through a user login")
+  userPrincipalName: String! @deprecated(reason: "FLRS can no longer be authorized through a user login")
+}
+
+type CacheInfo {
+  hits: [CacheHitOrMiss]
+  misses: [CacheHitOrMiss]
+}
+
+type CacheHitOrMiss {
+  field: String
+}
+
+"""The possible types of Zone"""
+enum Zone {
+  Zone_1
+  Zone_2
+  Zone_3
+  Zone_4
+}
+
+input UpdateCacCollectionProviderMutationInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The road speed percentage"""
+  collectionProvider: CollectionProvider!
+
+  """Date when the road speed percentage will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the road speed percentage will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateCacCollectionProviderMutationPayload {
+  """The updated attribute"""
+  updatedAttribute: StringChangeLog!
+}
+
+input UpdateCacSameDayEnabledMutationInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The road speed percentage"""
+  sameDayEnabled: Boolean!
+
+  """Date when the road speed percentage will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the road speed percentage will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateCacSameDayEnabledMutationPayload {
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+"""Input type for opening hours"""
+input UpdateCacOpeningHoursForWeekInput {
+  """The opening hours to be amended"""
+  openingHoursForWeek: [DayTimeWindowInput!]!
+
+  """The Fulfilment Location Id to amend"""
+  locationId: ID!
+
+  """Date from which the opening hours will apply"""
+  effectiveFrom: Date!
+
+  """Optional date when the opening hours will no longer be applicable"""
+  effectiveTo: Date
+}
+
+type UpdateCacOpeningHoursForWeekMutationPayload {
+  """The updated attribute"""
+  updatedAttribute: OpeningHoursForWeekChangeLog!
+}
+
+input UpdateCacDefaultSlotCapacityMutationInput {
+  """Click and collect ID to amend"""
+  locationId: ID!
+
+  """The default slot capacity of new slots"""
+  defaultSlotCapacity: Int!
+
+  """Date when the default slot capacity will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the default slot capacity will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateCacDefaultSlotCapacityMutationPayload {
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""
+Attributes for a click and collect location. These should be for a particular date
+"""
+type ClickAndCollectAttributes implements AttributeLink {
+  """
+  The opening hours for this date - i.e. when are customers permitted to walk up and ask for their shopping without upsetting a colleague
+  """
+  openingHours: DayTimeWindow
+
+  """The opening hours for the whole of this Sainsbury's week"""
+  openingHoursForWeek: [DayTimeWindow!]
+  type: ClickAndCollectType
+
+  """The location which picks the goods for this collection location"""
+  fulfilledBy: SainsburysStore
+  locationId: String!
+  date: Date
+  collectionProvider: CollectionProvider
+  sameDayEnabled: Boolean
+  defaultSlotCapacity: Int!
+}
+
+enum CollectionProvider {
+  """Plan Schedule Route"""
+  PSR
+
+  """Oracle Real-time Scheduler"""
+  ORS
+}
+
+enum CacAttributeNames {
+  COLLECTION_PROVIDER
+  SAME_DAY_ENABLED
+  OPENING_HOURS_FOR_WEEK
+}
+
+type ClickAndCollectAttributesWithChanges implements AttributeLink {
+  collectionProvider: CollectionProviderWithChanges
+  sameDayEnabled: BooleanWithChanges
+  openingHoursForWeek: OpeningHoursForWeekWithChanges
+  defaultSlotCapacity: IntWithChanges
+  locationId: String!
+  date: Date
+}
+
+type CollectionProviderChange implements AttributeChange {
+  id: ID
+  value: CollectionProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type CollectionProviderWithChanges {
+  value: CollectionProvider!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [CollectionProviderChange!]!
+}
+
+type OpeningHoursForWeekChange implements AttributeChange {
+  id: ID
+  value: [DayTimeWindow!]
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type OpeningHoursForWeekWithChanges {
+  value: [DayTimeWindow!]
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [OpeningHoursForWeekChange!]!
+}
+
+"""Log of all changes made to click and collect attributes"""
+type ClickAndCollectAttributesChangeLog implements AttributeLink {
+  """
+  Changelog for the same day enabled flag for the click and collect location
+  """
+  sameDayEnabled: [BooleanChangeLog!]
+
+  """
+  Changelog for the collection provider for the click and collect location
+  """
+  collectionProvider: [CollectionProviderChangeLog!]
+
+  """Changelog for the opening hours for the click and collect location"""
+  openingHoursForWeek: [OpeningHoursForWeekChangeLog!]
+
+  """
+  Changelog for the default slot capacity for the click and collect location
+  """
+  defaultSlotCapacity: [IntChangeLog!]
+  locationId: String!
+  date: Date
+}
+
+type CollectionProviderChangeLog implements ChangeLog {
+  id: ID!
+  value: CollectionProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type CollectionProviderChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: CollectionProvider!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+type OpeningHoursForWeekChangeLog implements ChangeLog {
+  id: ID!
+  value: [DayTimeWindow!]
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type OpeningHoursForWeekChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: [DayTimeWindow!]
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
+"""Log of all changes made to store attributes"""
+type ClickAndCollectAttributesEventHistory implements AttributeLink {
+  """
+  Change event history for the collection provider of the click and collect location
+  """
+  collectionProvider: [CollectionProviderChangeEvent!]
+
+  """
+  Change event history for the same day enabled flag of the click and collect location
+  """
+  sameDayEnabled: [BooleanChangeEvent!]
+
+  """
+  Change event history for the default slot capacity of the click and collect location
+  """
+  defaultSlotCapacity: [IntChangeEvent!]
+
+  """
+  Change event history for the opening hours of the click and collect location
+  """
+  openingHoursForWeek: [OpeningHoursForWeekChangeEvent!]
+  locationId: String!
+  date: Date
+}
+
+input ClickAndCollectFilter {
+  drsId: String
+}
+
+type ClickAndCollectConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [ClickAndCollectConnectionEdge!]!
+}
+
+type ClickAndCollectConnectionEdge {
+  node: ClickAndCollect!
+  cursor: String!
+}
+
+type ClickAndCollect implements FulfilmentLocation {
+  name: String!
+  drsId: String!
+  id: ID!
+
+  """
+  Attributes associated with this click and collect location. If no date provided, the attributes will be for today
+  """
+  attributes(date: Date): ClickAndCollectAttributes
+
+  """Change log of all changes made to the attribute"""
+  attributesChangeLog: ClickAndCollectAttributesChangeLog
+
+  """Attributes event history of all changes made to the attribute"""
+  attributesEventHistory: ClickAndCollectAttributesEventHistory
+
+  """
+  Attributes associated with this Click and collect location, including future changes to attributes. If no date provided, the attributes will be for today
+  """
+  attributesWithChanges(
+    date: Date
+
+    """
+    If gaps returning to the default value between/after temporary attributes should be included in the results.
+    """
+    includeGaps: Boolean
+  ): ClickAndCollectAttributesWithChanges
+  type: FulfilmentType!
+}
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+type OrderPickingCapacityMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+}
+
+type CollectionPickingCapacityMutationPayload {
+  """The updated location"""
+  location: SainsburysStore!
+}
+
+input UpdateAlcoholLicensingHoursInput {
+  """The alcohol licensing hours to be amended"""
+  alcoholLicensingHours: DayTimeWindowInput!
+
+  """The Fulfilment Location Id to amend"""
+  id: ID!
+
+  """The date this change applies from"""
+  appliesFrom: Date!
+}
+
+input DayTimeWindowInput {
+  start: Time!
+  end: Time!
+  dayOfWeek: DayOfWeek!
+}
+
+type AlcoholLicensingHoursMutationPayload {
+  """The updated location"""
+  location: FulfilmentLocation!
+}
+
+input OrderPickingCapacityForDate {
+  """The order picking capacity to set"""
+  orderPickingCapacity: Int!
+
+  """The date this capacity should apply on"""
+  appliesOn: Date!
+}
+
+input CollectionPickingCapacityForDate {
+  """The collection picking capacity to set"""
+  collectionPickingCapacity: Int!
+
+  """The date this capacity should apply on"""
+  appliesOn: Date!
+}
+
+"""Input type for opening hours"""
+input UpdateOpeningHoursInput {
+  """The opening hours to be amended"""
+  openingHours: DayTimeWindowInput!
+
+  """The Fulfilment Location Id to amend"""
+  id: ID!
+
+  """The date this change applies from. Defaults to tomorrow."""
+  appliesFrom: Date
+}
+
+"""Input type for mutating order picking capacity"""
+input UpdateOrderPickingCapacityInput {
+  """The Fulfilment Location Id to amend"""
+  id: ID!
+
+  """Order Picking Capacities to set"""
+  capacities: [OrderPickingCapacityForDate!]!
+}
+
+"""Input type for mutating collection picking capacity"""
+input UpdateCollectionPickingCapacityInput {
+  """The Fulfilment Location Id to amend"""
+  id: ID!
+
+  """Collection Picking Capacities to set"""
+  capacities: [CollectionPickingCapacityForDate!]!
+}
+
+type SainsburysStore implements FulfilmentLocation {
+  code: String!
+  name: String!
+  id: ID!
+  placeId: String
+  propositions(date: Date): [FulfilmentLocation!]
+
+  """
+  Attributes associated with this Sainsburys store. If no date provided, the attributes will be for today
+  """
+  attributes(date: Date): SainsburysStoreAttributes
+
+  """Change log of all changes made to the attribute"""
+  attributesChangeLog: SainsburysStoreAttributesChangeLog
+
+  """Attributes event history of all changes made to the attribute"""
+  attributesEventHistory: SainsburysStoreAttributesEventHistory
+
+  """
+  Attributes associated with this Sainsburys store, including future changes to attributes. If no date provided, the attributes will be for today
+  """
+  attributesWithChanges(
+    date: Date
+
+    """
+    If gaps returning to the default value between/after temporary attributes should be included in the results.
+    """
+    includeGaps: Boolean
+  ): SainsburysStoreAttributesWithChanges
+
+  """The zone this store belongs to"""
+  zone: Zone
+  type: FulfilmentType!
+}
+
+input SainsburysStoreFilter {
+  code: String
+  placeId: String
+  flrsId: String
+}
+
+type SainsburysStoreConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [SainsburysStoreConnectionEdge!]!
+}
+
+type SainsburysStoreConnectionEdge {
+  node: SainsburysStore!
+  cursor: String!
+}
+
+input FulfilmentLocationFilter {
+  id: ID
+}
+
+type FulfilmentLocationConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [FulfilmentLocationConnectionEdge!]!
+}
+
+type FulfilmentLocationConnectionEdge {
+  node: FulfilmentLocation!
+  cursor: String!
+}
+
+interface FulfilmentLocation {
+  name: String!
+  id: ID!
+}
+
+enum FulfilmentType {
+  SAINSBURYS_STORE
+  CLICK_AND_COLLECT
+}
+
+interface AttributeLink {
+  locationId: String!
+  date: Date
+}
+
+type PageInfo {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type DayTimeWindow {
+  start: Time!
+  end: Time!
+  dayOfWeek: DayOfWeek!
+}
+
+"""
+Date custom scalar type follows ISO 8601 Date format "YYYY-MM-DD"
+"""
+scalar Date
+
+"""Representation of a time in 24H format (e.g. 19:00)."""
+scalar Time
+
+"""The days of the week"""
+enum DayOfWeek {
+  """The worst day"""
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+
+  """Day of treats"""
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+"""The possible types of Click and Collect"""
+enum ClickAndCollectType {
+  """Collect from a Van in a Carpark"""
+  LINES_AND_SIGNS
+
+  """Collect from somewhere in the store"""
+  FULFIL_FROM_ROOM
+}
+
+"""The possible road types"""
+enum RoadType {
+  TOLL
+  FERRY
+}
