@@ -5,8 +5,11 @@ import com.netflix.graphql.dgs.client.GraphQLClient;
 import com.netflix.graphql.dgs.client.GraphQLResponse;
 import com.netflix.graphql.dgs.client.RestClientGraphQLClient;
 import com.netflix.graphql.dgs.client.codegen.GraphQLQueryRequest;
+import java.awt.print.Book;
 import java.util.List;
 
+import org.springframework.graphql.client.DgsGraphQlClient;
+import org.springframework.graphql.client.HttpSyncGraphQlClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
@@ -20,9 +23,14 @@ import uk.co.sainsburys.graphqlsampler.codegen.types.SainsburysStoreFilter;
 @RestController
 public class GraphQLClientController {
   private final GraphQLClient graphQLClient;
+  private final HttpSyncGraphQlClient httpSyncGraphQlClient;
 
   public GraphQLClientController(RestClient.Builder builder) {
-    this.graphQLClient = new RestClientGraphQLClient(builder.baseUrl("https://psr-flrs.int.stg.jspaas.uk/graphql").build());
+    RestClient restClient = builder.baseUrl("https://psr-flrs.int.stg.jspaas.uk/graphql").build();
+
+    this.graphQLClient = new RestClientGraphQLClient(restClient);
+
+    this.httpSyncGraphQlClient = HttpSyncGraphQlClient.create(restClient);
   }
 
   @GetMapping("/")
@@ -49,4 +57,20 @@ public class GraphQLClientController {
     List<SainsburysStore> stores = response.extractValueAsObject("sainsburysStores.edges[*].node", new TypeRef<List<SainsburysStore>>(){});
     return stores;
   }
+
+  @GetMapping("/dgs")
+  public SainsburysStore retrieveStoreViaDGS() {
+    DgsGraphQlClient dgsClient = DgsGraphQlClient.create(httpSyncGraphQlClient);
+
+    // issues with arrays here, so using a single store for now
+    SainsburysStore store = dgsClient.request(SainsburysStoresGraphQLQuery.newRequest().build())
+        .projection(new SainsburysStoresProjectionRoot<>().edges().node()
+            .name().code().id().placeId()
+            .attributes().collectionPickingCapacity())
+        .retrieveSync("sainsburysStores.edges[0].node")
+        .toEntity(SainsburysStore.class);
+
+    return store;
+  }
+
 }
