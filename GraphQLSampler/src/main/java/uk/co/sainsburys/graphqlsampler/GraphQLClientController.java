@@ -18,6 +18,8 @@ import uk.co.sainsburys.graphqlsampler.codegen.client.SainsburysStoreProjectionR
 import uk.co.sainsburys.graphqlsampler.codegen.client.SainsburysStoresGraphQLQuery;
 import uk.co.sainsburys.graphqlsampler.codegen.client.SainsburysStoresProjectionRoot;
 import uk.co.sainsburys.graphqlsampler.codegen.types.SainsburysStore;
+import uk.co.sainsburys.graphqlsampler.codegen.types.SainsburysStoreConnection;
+import uk.co.sainsburys.graphqlsampler.codegen.types.SainsburysStoreConnectionEdge;
 import uk.co.sainsburys.graphqlsampler.codegen.types.SainsburysStoreFilter;
 
 @RestController
@@ -59,18 +61,20 @@ public class GraphQLClientController {
   }
 
   @GetMapping("/dgs")
-  public SainsburysStore retrieveStoreViaDGS() {
+  public List<SainsburysStore> retrieveStoreViaDGS() {
     DgsGraphQlClient dgsClient = DgsGraphQlClient.create(httpSyncGraphQlClient);
 
-    // issues with arrays here, so using a single store for now
-    SainsburysStore store = dgsClient.request(SainsburysStoresGraphQLQuery.newRequest().build())
+    SainsburysStoreConnection store = dgsClient.request(SainsburysStoresGraphQLQuery.newRequest().build())
         .projection(new SainsburysStoresProjectionRoot<>().edges().node()
             .name().code().id().placeId()
             .attributes().collectionPickingCapacity())
-        .retrieveSync("sainsburysStores.edges[0].node")
-        .toEntity(SainsburysStore.class);
+        .retrieveSync("sainsburysStores")
+        .toEntity(SainsburysStoreConnection.class);
 
-    return store;
+    return store.getEdges().
+        stream()
+        .map(SainsburysStoreConnectionEdge::getNode)
+        .toList();
   }
 
 }
