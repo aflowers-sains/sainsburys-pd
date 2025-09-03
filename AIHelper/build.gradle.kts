@@ -1,7 +1,7 @@
 plugins {
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
     java
-    id("org.springframework.boot") version "3.4.3"
-    id("io.spring.dependency-management") version "1.1.7"
     groovy
 }
 
@@ -19,15 +19,23 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.webflux)
+    // Lombok for logging and annotations
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation(platform("org.spockframework:spock-bom:2.3-groovy-4.0"))
-    testImplementation("org.spockframework:spock-core")
+    testImplementation(libs.spring.boot.starter.test)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
-    testImplementation(platform("org.apache.groovy:groovy-bom:4.0.25"))
-    testImplementation("org.apache.groovy:groovy")
+    testImplementation(platform(libs.spock.bom))
+    testImplementation(libs.spock.core)
+
+    testImplementation(platform(libs.groovy.bom))
+    testImplementation(libs.groovy)
+
+    implementation(libs.graphql.java)
+    implementation(libs.dgs.graphql.client)
 }
 
 tasks.withType<Test> {
