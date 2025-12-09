@@ -42,6 +42,7 @@ tasks.generateJava {
     trackInputFieldSet = true
     typeMapping.put("Time", "java.time.LocalTime")
     typeMapping.put("Date", "java.time.LocalDate")
+    typeMapping.put("FlrsID", "java.lang.String")
 }
 
 tasks.withType<Test> {

@@ -11,6 +11,15 @@ Indicates exactly one field must be supplied and this field must not be `null`.
 """
 directive @oneOf on INPUT_OBJECT
 
+"""Base response from an attribute mutation"""
+interface UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: ChangeLog!
+}
+
 interface AttributeChange {
   id: ID
   effectiveFrom: Date!
@@ -56,6 +65,20 @@ type MaybeIntWithChanges {
   upcomingChanges(limit: Int): [MaybeIntChange!]!
 }
 
+type FloatChange implements AttributeChange {
+  id: ID
+  value: Float!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type FloatWithChanges {
+  value: Float!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Float): [FloatChange!]!
+}
+
 type BooleanChange implements AttributeChange {
   id: ID
   value: Boolean!
@@ -98,6 +121,19 @@ type IntChangeLog implements ChangeLog {
 type MaybeIntChangeLog implements ChangeLog {
   id: ID!
   value: Int
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type FloatChangeLog implements ChangeLog {
+  id: ID!
+  value: Float!
   effectiveFrom: Date!
   effectiveTo: Date!
   createdBy: String
@@ -184,29 +220,20 @@ type MaybeIntChangeEvent implements AttributeChangeEvent {
   doneAt: Date!
 }
 
+type FloatChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: Float!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
 type Mutation {
   """Deletes an attribute change"""
-  deleteAttributeChange(input: DeleteAttributeChangeInput!): DeleteAttributeChangePayload
-
-  """Updates alcohol restricted departure enabled for a store"""
-  updateAlcoholRestrictedDepartureEnabled(
-    input: UpdateAlcoholRestrictedDepartureEnabledInput!
-
-    """
-    Optional ID for an existing Change to modify with these values, rather than creating a new Change
-    """
-    existingAttributeChangeIdToModify: ID
-  ): UpdateAlcoholRestrictedDepartureEnabledMutationPayload
-
-  """Updates alcohol buffer time for a given location."""
-  updateAlcoholBufferTime(
-    input: UpdateAlcoholBufferTimeInput!
-
-    """
-    Optional ID for an existing Change to modify with these values, rather than creating a new Change
-    """
-    existingAttributeChangeIdToModify: ID
-  ): UpdateAlcoholBufferTimeMutationPayload
+  deleteAttributeChange(input: DeleteAttributeChangeInput!): DeleteAttributeChangeResponse
 
   """Updates the GOL yard location coordinates for a store"""
   updateGolYardLocation(
@@ -216,7 +243,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateGolYardLocationMutationPayload
+  ): UpdateGolYardLocationMutationResponse
 
   """Updates the load time for a store"""
   updateLoadTime(
@@ -226,17 +253,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateLoadTimeMutationPayload
-
-  """Updates the overweight allowance percentage for a store"""
-  updateOverweightAllowancePercentage(
-    input: UpdateOverweightAllowancePercentageInput!
-
-    """
-    Optional ID for an existing Change to modify with these values, rather than creating a new Change
-    """
-    existingAttributeChangeIdToModify: ID
-  ): UpdateOverweightAllowancePercentageMutationPayload
+  ): UpdateLoadTimeMutationResponse
 
   """Updates the road speed percentage for a store"""
   updateRoadSpeedPercentage(
@@ -246,7 +263,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateRoadSpeedPercentageMutationPayload
+  ): UpdateRoadSpeedPercentageMutationResponse
 
   """Updates the routing provider for a store"""
   updateRoutingProvider(
@@ -256,7 +273,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateRoutingProviderMutationPayload
+  ): UpdateRoutingProviderMutationResponse
 
   """Updates the payload of vehicles for a store"""
   updateVehiclePayloadKilograms(
@@ -266,17 +283,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateVehiclePayloadKilogramsMutationPayload
-
-  """Updates same day enabled for a store"""
-  updateSameDayEnabled(
-    input: UpdateSameDayEnabledInput!
-
-    """
-    Optional ID for an existing Change to modify with these values, rather than creating a new Change
-    """
-    existingAttributeChangeIdToModify: ID
-  ): UpdateSameDayEnabledMutationPayload
+  ): UpdateVehiclePayloadKilogramsMutationResponse
 
   """Updates the roads that vehicles avoid for a store"""
   updateRoadsAvoided(
@@ -286,7 +293,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateRoadsAvoidedMutationPayload
+  ): UpdateRoadsAvoidedMutationResponse
 
   """Updates location enabled for a store"""
   updateLocationEnabled(
@@ -296,7 +303,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateLocationEnabledMutationPayload
+  ): UpdateLocationEnabledMutationResponse
 
   """Updates vehicle range miles for a store"""
   updateVehicleRangeMiles(
@@ -306,7 +313,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateVehicleRangeMilesMutationPayload
+  ): UpdateVehicleRangeMilesMutationResponse
 
   """Updates max vehicle gross weight kilograms for a store"""
   updateMaxVehicleGrossWeight(
@@ -316,7 +323,27 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateMaxVehicleGrossWeightMutationPayload
+  ): UpdateMaxVehicleGrossWeightMutationResponse
+
+  """Updates default predicted order weight (in grams) for a given location"""
+  updateDefaultPredictedOrderWeight(
+    input: UpdateDefaultPredictedOrderWeightInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateDefaultPredictedOrderWeightMutationResponse
+
+  """Updates debrief time for a given location"""
+  updateDebriefTimeMinutes(
+    input: UpdateDebriefTimeMinutesInput
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateDebriefTimeMinutesMutationResponse
 
   """Create a test store. Pre-production environments only."""
   createTestStore: SainsburysStore
@@ -328,7 +355,7 @@ type Mutation {
   deleteAllTestStores: Boolean
 
   """Deletes an attribute change"""
-  undoAttributeChange(input: UndoAttributeChangeInput!): UndoAttributeChangePayload
+  undoAttributeChange(input: UndoAttributeChangeInput!): UndoAttributeChangeResponse
 
   """Updates collection provider for a click and collect location"""
   updateCacCollectionProvider(
@@ -338,7 +365,7 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateCacCollectionProviderMutationPayload
+  ): UpdateCacCollectionProviderMutationResponse
   updateCacSameDayEnabled(
     input: UpdateCacSameDayEnabledMutationInput!
 
@@ -346,17 +373,17 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateCacSameDayEnabledMutationPayload
+  ): UpdateCacSameDayEnabledMutationResponse
 
   """Updates opening hours for week for a given location."""
   updateCacOpeningHoursForWeek(
-    input: UpdateCacOpeningHoursForWeekInput!
+    input: UpdateCacOpeningHoursForWeekMutationInput!
 
     """
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateCacOpeningHoursForWeekMutationPayload
+  ): UpdateCacOpeningHoursForWeekMutationResponse
 
   """Updates default slot capacity for a given location."""
   updateCacDefaultSlotCapacity(
@@ -366,25 +393,98 @@ type Mutation {
     Optional ID for an existing Change to modify with these values, rather than creating a new Change
     """
     existingAttributeChangeIdToModify: ID
-  ): UpdateCacDefaultSlotCapacityMutationPayload
+  ): UpdateCacDefaultSlotCapacityMutationResponse
+
+  """Updates travel time for a given location."""
+  updateCacTravelTimeMinutes(
+    input: UpdateCacTravelTimeMinutesMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacTravelTimeMinutesMutationResponse
+
+  """Updates collection windows week pattern for a given location."""
+  updateCacCollectionWindowsForWeek(
+    input: UpdateCacCollectionWindowsForWeekMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacCollectionWindowsForWeekMutationResponse
+
+  """Updates fulfilment type for a given location"""
+  updateCacType(
+    input: UpdateCacFulfilmentTypeMutationInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateCacFulfilmentTypeMutationResponse
+
+  """Updates alcohol buffer time for a given location."""
+  updateAlcoholBufferTime(
+    input: UpdateAlcoholBufferTimeInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateAlcoholBufferTimeMutationResponse
+
+  """Updates alcohol restricted departure enabled for a store"""
+  updateAlcoholRestrictedDepartureEnabled(
+    input: UpdateAlcoholRestrictedDepartureEnabledInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateAlcoholRestrictedDepartureEnabledMutationResponse
+
+  """Updates the overweight allowance percentage for a store"""
+  updateOverweightAllowancePercentage(
+    input: UpdateOverweightAllowancePercentageInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateOverweightAllowancePercentageMutationResponse
+
+  """Updates same day enabled for a store"""
+  updateSameDayEnabled(
+    input: UpdateSameDayEnabledInput!
+
+    """
+    Optional ID for an existing Change to modify with these values, rather than creating a new Change
+    """
+    existingAttributeChangeIdToModify: ID
+  ): UpdateSameDayEnabledMutationResponse
+
+  """Updates the order weight modifier (float) for a given location"""
+  updateOrderWeightModifier(input: UpdateOrderWeightModifierInput!, existingAttributeChangeIdToModify: ID): UpdateOrderWeightModifierResponse
 
   """Updates alcohol opening hours for a given location."""
-  updateAlcoholLicensingHours(input: UpdateAlcoholLicensingHoursInput!): AlcoholLicensingHoursMutationPayload
+  updateAlcoholLicensingHours(input: UpdateAlcoholLicensingHoursInput!): AlcoholLicensingHoursMutationResponse
 
   """Updates order picking capacities for a given location."""
-  updateOrderPickingCapacities(input: UpdateOrderPickingCapacityInput!): OrderPickingCapacityMutationPayload
+  updateOrderPickingCapacities(input: UpdateOrderPickingCapacityInput!): OrderPickingCapacityMutationResponse
 
   """Updates order picking capacities for multiple locations."""
-  updateOrderPickingCapacitiesInBulk(inputs: [UpdateOrderPickingCapacityInput!]!): [OrderPickingCapacityMutationPayload]
+  updateOrderPickingCapacitiesInBulk(inputs: [UpdateOrderPickingCapacityInput!]!): [OrderPickingCapacityMutationResponse]
 
   """Updates collection picking capacities for a given location."""
-  updateCollectionPickingCapacities(input: UpdateCollectionPickingCapacityInput!): CollectionPickingCapacityMutationPayload
+  updateCollectionPickingCapacities(input: UpdateCollectionPickingCapacityInput!): CollectionPickingCapacityMutationResponse
 
   """Updates collection picking capacities for multiple locations."""
-  updateCollectionPickingCapacitiesInBulk(inputs: [UpdateCollectionPickingCapacityInput!]!): [CollectionPickingCapacityMutationPayload]
+  updateCollectionPickingCapacitiesInBulk(inputs: [UpdateCollectionPickingCapacityInput!]!): [CollectionPickingCapacityMutationResponse]
 }
 
-type DeleteAttributeChangePayload {
+type DeleteAttributeChangeResponse {
   success: Boolean!
 }
 
@@ -395,7 +495,10 @@ input DeleteAttributeChangeInput {
 
 input UpdateRoadSpeedPercentageInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The road speed percentage"""
   roadSpeedPercentage: Int!
@@ -409,17 +512,8 @@ input UpdateRoadSpeedPercentageInput {
   effectiveTo: Date
 }
 
-"""Base response from an attribute mutation"""
-interface UpdateAttributeMutationPayload {
-  """The updated location"""
-  location: SainsburysStore!
-
-  """The updated attribute"""
-  updatedAttribute: ChangeLog!
-}
-
 """Response returned from a road speed percentage update mutation"""
-type UpdateRoadSpeedPercentageMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateRoadSpeedPercentageMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -429,7 +523,10 @@ type UpdateRoadSpeedPercentageMutationPayload implements UpdateAttributeMutation
 
 input UpdateGolYardLocationInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The GOL yard location coordinates"""
   golYardLocation: GolYardLocationInput!
@@ -447,7 +544,7 @@ input GolYardLocationInput {
 }
 
 """Response returned from a GOL yard location coordinates update mutation"""
-type UpdateGolYardLocationMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateGolYardLocationMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -457,7 +554,10 @@ type UpdateGolYardLocationMutationPayload implements UpdateAttributeMutationPayl
 
 input UpdateRoutingProviderInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The routing provider for the store"""
   routingProvider: RoutingProvider!
@@ -470,7 +570,7 @@ input UpdateRoutingProviderInput {
 }
 
 """Response returned from a routing provider update"""
-type UpdateRoutingProviderMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateRoutingProviderMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -481,7 +581,10 @@ type UpdateRoutingProviderMutationPayload implements UpdateAttributeMutationPayl
 """Input type for mutating road types vehicles avoid"""
 input UpdateRoadsAvoidedInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The road types vehicles avoid"""
   roadsAvoided: [RoadType!]!
@@ -494,7 +597,7 @@ input UpdateRoadsAvoidedInput {
 }
 
 """Response returned from a roads avoided update"""
-type UpdateRoadsAvoidedMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateRoadsAvoidedMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -502,33 +605,12 @@ type UpdateRoadsAvoidedMutationPayload implements UpdateAttributeMutationPayload
   updatedAttribute: RoadTypeChangeLog!
 }
 
-"""Input type for mutating alcohol restricted departure enabled"""
-input UpdateAlcoholRestrictedDepartureEnabledInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
-
-  """Flag to enable alcohol restricted departure"""
-  alcoholRestrictedDepartureEnabled: Boolean!
-
-  """Date when alcohol restricted departure will be enabled from"""
-  effectiveFrom: Date!
-
-  """Optional date when the restriction will no longer be applicable"""
-  effectiveTo: Date
-}
-
-"""Response returned from a alcohol restricted departure enabled update"""
-type UpdateAlcoholRestrictedDepartureEnabledMutationPayload implements UpdateAttributeMutationPayload {
-  """The updated location"""
-  location: SainsburysStore!
-
-  """The updated attribute"""
-  updatedAttribute: BooleanChangeLog!
-}
-
 input UpdateLoadTimeInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The load time in minutes"""
   loadTime: Int!
@@ -541,7 +623,7 @@ input UpdateLoadTimeInput {
 }
 
 """Response returned from a load time update mutation"""
-type UpdateLoadTimeMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateLoadTimeMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -552,7 +634,10 @@ type UpdateLoadTimeMutationPayload implements UpdateAttributeMutationPayload {
 """Input type for mutating location enabled"""
 input UpdateLocationEnabledInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """Flag to enable location"""
   locationEnabled: Boolean!
@@ -565,31 +650,7 @@ input UpdateLocationEnabledInput {
 }
 
 """Response returned from a location enabled update"""
-type UpdateLocationEnabledMutationPayload implements UpdateAttributeMutationPayload {
-  """The updated location"""
-  location: SainsburysStore!
-
-  """The updated attribute"""
-  updatedAttribute: BooleanChangeLog!
-}
-
-"""Input type for mutating same day enabled"""
-input UpdateSameDayEnabledInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
-
-  """Flag to enable same day"""
-  sameDayEnabled: Boolean!
-
-  """Date when same day will be enabled from"""
-  effectiveFrom: Date!
-
-  """Optional date when same day no longer be applicable"""
-  effectiveTo: Date
-}
-
-"""Response returned from a same day enabled update"""
-type UpdateSameDayEnabledMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateLocationEnabledMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -600,7 +661,10 @@ type UpdateSameDayEnabledMutationPayload implements UpdateAttributeMutationPaylo
 """Input type for mutating vehicle payload"""
 input UpdateVehiclePayloadKilogramsInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The payload for vehicles."""
   vehiclePayloadKilograms: Int!
@@ -613,7 +677,7 @@ input UpdateVehiclePayloadKilogramsInput {
 }
 
 """Response returned from a vehicle payload update"""
-type UpdateVehiclePayloadKilogramsMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateVehiclePayloadKilogramsMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -624,7 +688,10 @@ type UpdateVehiclePayloadKilogramsMutationPayload implements UpdateAttributeMuta
 """Input type for mutating vehicle range in miles"""
 input UpdateVehicleRangeMilesInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """Vehicle range in miles"""
   vehicleRangeMiles: Int!
@@ -637,59 +704,7 @@ input UpdateVehicleRangeMilesInput {
 }
 
 """Response returned from a vehicle range update"""
-type UpdateVehicleRangeMilesMutationPayload implements UpdateAttributeMutationPayload {
-  """The updated location"""
-  location: SainsburysStore!
-
-  """The updated attribute"""
-  updatedAttribute: IntChangeLog!
-}
-
-"""Input type for mutating alcohol buffer time"""
-input UpdateAlcoholBufferTimeInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
-
-  """The alcohol buffer in minutes"""
-  alcoholBufferTime: Int!
-
-  """Date when the alcohol buffer time will be applicable from"""
-  effectiveFrom: Date!
-
-  """
-  Optional date when the alcohol buffer time will no longer be applicable
-  """
-  effectiveTo: Date
-}
-
-type UpdateAlcoholBufferTimeMutationPayload implements UpdateAttributeMutationPayload {
-  """The updated location"""
-  location: SainsburysStore!
-
-  """The updated attribute"""
-  updatedAttribute: IntChangeLog!
-}
-
-input UpdateOverweightAllowancePercentageInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
-
-  """The overweight allowance in percentages"""
-  overweightAllowancePercentage: Int!
-
-  """Date when the overweight allowance percentage will be applicable from"""
-  effectiveFrom: Date!
-
-  """
-  Optional date when the overweight allowance percentage will no longer be applicable
-  """
-  effectiveTo: Date
-}
-
-"""
-Response returned from an overweight allowance percentage update mutation
-"""
-type UpdateOverweightAllowancePercentageMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateVehicleRangeMilesMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
@@ -700,7 +715,10 @@ type UpdateOverweightAllowancePercentageMutationPayload implements UpdateAttribu
 """Input type for mutating vehicle range in miles"""
 input UpdateMaxVehicleGrossWeightInput {
   """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """Vehicle range in miles"""
   maxVehicleGrossWeight: Int!
@@ -713,12 +731,65 @@ input UpdateMaxVehicleGrossWeightInput {
 }
 
 """Response returned from a vehicle range update"""
-type UpdateMaxVehicleGrossWeightMutationPayload implements UpdateAttributeMutationPayload {
+type UpdateMaxVehicleGrossWeightMutationResponse implements UpdateAttributeMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 
   """The updated attribute"""
   updatedAttribute: IntChangeLog!
+}
+
+type UpdateDefaultPredictedOrderWeightMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating default predicted order weight"""
+input UpdateDefaultPredictedOrderWeightInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """The updated default predicted order weight in grams"""
+  defaultPredictedOrderWeight: Int!
+
+  """Date when the default predicted order weight will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the default predicted order weight will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateDebriefTimeMinutesMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating debrief time"""
+input UpdateDebriefTimeMinutesInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID!
+
+  """The updated debrief time in minutes"""
+  debriefTimeMinutes: Int!
+
+  """Date when the default predicted order weight will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the default predicted order weight will no longer be applicable
+  """
+  effectiveTo: Date
 }
 
 type SainsburysStoreAttributes implements AttributeLink {
@@ -761,25 +832,25 @@ type SainsburysStoreAttributes implements AttributeLink {
   roadSpeedPercentage: Int
 
   """The payload for vehicles."""
-  vehiclePayloadKilograms: Int
+  vehiclePayloadKilograms: Int!
 
   """The flag to check if same day is enabled for a particular day."""
-  sameDayEnabled: Boolean
+  sameDayEnabled: Boolean @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributes.sameDayEnabled")
 
   """
   The flag to check if alcohol restricted departure is enabled for a particular day.
   """
-  alcoholRestrictedDepartureEnabled: Boolean
+  alcoholRestrictedDepartureEnabled: Boolean @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributes.alcoholRestrictedDepartureEnabled")
 
   """
   The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours. Unit is minutes
   """
-  alcoholBufferTime: Int
+  alcoholBufferTime: Int @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributes.alcoholBufferTime")
 
   """
   The overweight allowance percentage, adds additional payload on top of minimum payload
   """
-  overweightAllowancePercentage: Int
+  overweightAllowancePercentage: Int @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributes.overweightAllowancePercentage")
 
   """Specifies the road types vehicles void when conducting deliveries"""
   roadsAvoided: [RoadType!]
@@ -794,7 +865,18 @@ type SainsburysStoreAttributes implements AttributeLink {
 
   """The max gross weight of vehicles in this store (in kilograms)"""
   maxVehicleGrossWeight: Int
-  locationId: String!
+
+  """The default predicted order weight for this store (in grams)"""
+  defaultPredictedOrderWeight: Int
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: Float @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributes.orderWeightModifier")
+
+  """The time taken to debrief after a shift (in minutes)"""
+  debriefTimeMinutes: Int!
+
+  """Internal use only"""
+  entityId: FlrsID!
   date: Date
 }
 
@@ -830,22 +912,22 @@ type SainsburysStoreAttributesWithChanges implements AttributeLink {
   vehiclePayloadKilograms: MaybeIntWithChanges
 
   """The flag to check if same day is enabled for a particular day."""
-  sameDayEnabled: BooleanWithChanges
+  sameDayEnabled: BooleanWithChanges @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesWithChanges.sameDayEnabled")
 
   """
   The flag to check if alcohol restricted departure is enabled for a particular day.
   """
-  alcoholRestrictedDepartureEnabled: BooleanWithChanges
+  alcoholRestrictedDepartureEnabled: BooleanWithChanges @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesWithChanges.alcoholRestrictedDepartureEnabled")
 
   """
   The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours
   """
-  alcoholBufferTime: IntWithChanges
+  alcoholBufferTime: IntWithChanges @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesWithChanges.alcoholBufferTime")
 
   """
   The overweight allowance percentage, adds additional payload on top of minimum payload
   """
-  overweightAllowancePercentage: IntWithChanges
+  overweightAllowancePercentage: IntWithChanges @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesWithChanges.overweightAllowancePercentage")
 
   """The road types vehicles avoid"""
   roadsAvoided: RoadTypeWithChanges
@@ -860,7 +942,18 @@ type SainsburysStoreAttributesWithChanges implements AttributeLink {
 
   """The max gross weight of vehicles in this store (in kilograms)"""
   maxVehicleGrossWeight: IntWithChanges
-  locationId: String!
+
+  """The default predicted order weight for this store (in grams)"""
+  defaultPredictedOrderWeight: IntWithChanges
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: FloatWithChanges @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesWithChanges.orderWeightModifier")
+
+  """The time taken to debrief after a shift (in minutes)"""
+  debriefTimeMinutes: IntWithChanges
+
+  """Internal use only"""
+  entityId: FlrsID!
   date: Date
 }
 
@@ -924,19 +1017,19 @@ type SainsburysStoreAttributesChangeLog implements AttributeLink {
   vehiclePayloadKilograms: [MaybeIntChangeLog!]
 
   """Changelog for the alcohol buffer time of the store"""
-  alcoholBufferTime: [IntChangeLog!]
+  alcoholBufferTime: [IntChangeLog!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attribuesChangeLog.alcoholBufferTims")
 
   """Changelog for the alcohol restricted departure flag for the store"""
-  alcoholRestrictedDepartureEnabled: [BooleanChangeLog!]
+  alcoholRestrictedDepartureEnabled: [BooleanChangeLog!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attribuesChangeLog.alcoholRestrictedDepartureEnabled")
 
   """Changelog for the overweight allowance percentage for the store"""
-  overweightAllowancePercentage: [IntChangeLog!]
+  overweightAllowancePercentage: [IntChangeLog!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesChangeLog.overweightAllowancePercentage")
 
   """Changelog for road types vehicles avoid for the store"""
   roadsAvoided: [RoadTypeChangeLog!]
 
   """Changelog for the same day enabled flag for the store"""
-  sameDayEnabled: [BooleanChangeLog!]
+  sameDayEnabled: [BooleanChangeLog!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesChangeLog.sameDayEnabled")
 
   """Changelog for the location enabled flag for the store"""
   locationEnabled: [BooleanChangeLog!]
@@ -946,7 +1039,22 @@ type SainsburysStoreAttributesChangeLog implements AttributeLink {
 
   """Changelog for the max vehicle gross weight in kilograms for the store"""
   maxVehicleGrossWeight: [IntChangeLog!]
-  locationId: String!
+
+  """
+  Changelog for the modifier to apply to order weights between 0.5 and 2 (float)
+  """
+  defaultPredictedOrderWeight: [IntChangeLog!]
+
+  """
+  Changelog for the modifier to apply to order weights between 0.5 and 2 (float)
+  """
+  orderWeightModifier: [FloatChangeLog!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesChangeLog.orderWeightModifier")
+
+  """Changelog for the time taken to debrief after a shift (in minutes)"""
+  debriefTimeMinutes: [IntChangeLog!]
+
+  """Internal use only"""
+  entityId: FlrsID!
   date: Date
 }
 
@@ -1031,7 +1139,7 @@ type SainsburysStoreAttributesEventHistory implements AttributeLink {
   routingProvider: [RoutingProviderChangeEvent!]
 
   """Change event history for the alcohol buffer time of the store"""
-  alcoholBufferTime: [IntChangeEvent!]
+  alcoholBufferTime: [IntChangeEvent!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesEventHistory.alcoholBufferTime")
 
   """Change event history for the road speed percentage of the store"""
   roadSpeedPercentage: [IntChangeEvent!]
@@ -1045,18 +1153,18 @@ type SainsburysStoreAttributesEventHistory implements AttributeLink {
   """
   Change event history for the alcohol restricted departure flag of the store
   """
-  alcoholRestrictedDepartureEnabled: [BooleanChangeEvent!]
+  alcoholRestrictedDepartureEnabled: [BooleanChangeEvent!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesEventHistory.alcoholRestrictedDepartureEnabled")
 
   """
   Change event history for the overweight allowance percentage of the store
   """
-  overweightAllowancePercentage: [IntChangeEvent!]
+  overweightAllowancePercentage: [IntChangeEvent!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesEventHistory.overweightAllowancePercentage")
 
   """Change event history for road types vehicles avoid of the store"""
   roadsAvoided: [RoadTypeChangeEvent!]
 
   """Change event history for the same day enabled flag of the store"""
-  sameDayEnabled: [BooleanChangeEvent!]
+  sameDayEnabled: [BooleanChangeEvent!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesEventHistory.sameDayEnabled")
 
   """Change event history for the location enabled flag of the store"""
   locationEnabled: [BooleanChangeEvent!]
@@ -1066,7 +1174,18 @@ type SainsburysStoreAttributesEventHistory implements AttributeLink {
 
   """Change event history for the max vehicle gross weight of the store"""
   maxVehicleGrossWeight: [IntChangeEvent!]
-  locationId: String!
+
+  """The default predicted order weight for this store (in grams)"""
+  defaultPredictedOrderWeight: [IntChangeEvent!]
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: [FloatChangeEvent!] @deprecated(reason: "this has been moved to: sainsburysStore.services.homeDelivery.attributesEventHistory.orderWeightModifier")
+
+  """The time taken to debrief after a shift (in minutes)"""
+  debriefTimeMinutes: [IntChangeEvent!]
+
+  """Internal use only"""
+  entityId: FlrsID!
   date: Date
 }
 
@@ -1100,9 +1219,23 @@ enum StoreAttributeNames {
   ORDER_PICKING_CAPACITY
   COLLECTION_PICKING_CAPACITY
   MAX_VEHICLE_GROSS_WEIGHT
+  DEFAULT_PREDICTED_ORDER_WEIGHT
+  ORDER_WEIGHT_MODIFIER
+  DEBRIEF_TIME_MINUTES
 }
 
-type UndoAttributeChangePayload {
+type SainsburysStoreServices {
+  homeDelivery: HomeDeliveryService
+  clickAndCollect: [ClickAndCollect!]
+  serviceIndex: Int!
+}
+
+enum ServiceType {
+  CLICK_AND_COLLECT
+  HOME_DELIVERY
+}
+
+type UndoAttributeChangeResponse {
   success: Boolean!
 }
 
@@ -1112,11 +1245,11 @@ input UndoAttributeChangeInput {
 }
 
 type Query {
-  viewer: Viewer
+  viewer: Viewer @deprecated(reason: "FLRS can no longer be authorized through a user login")
   zones: [Zone!]!
 
   """Get a Click and Collect location"""
-  clickAndCollect(filter: ClickAndCollectFilter!): ClickAndCollect
+  clickAndCollect(filter: ClickAndCollectFilter!): ClickAndCollect @deprecated(reason: "Please use the sainsburysStore query, you can provide the flrsId of a click and collect in the filter. You can retrieve the click and collect data from sainsburysStore.services.clickAndCollect.")
 
   """
   Get all Click and Collect locations, optionally restricted by a number of filters
@@ -1136,7 +1269,7 @@ type Query {
 
     """Not implemented"""
     last: Int
-  ): ClickAndCollectConnection!
+  ): ClickAndCollectConnection! @deprecated(reason: "Please use the sainsburysStores query, you can retrive the click and collect data from edges.node.services.clickAndCollect.")
 
   """Search for a Click and Collect Location by string token"""
   searchForClickAndCollect(
@@ -1153,10 +1286,18 @@ type Query {
 
     """Not implemented"""
     last: Int
-  ): ClickAndCollectConnection
+  ): ClickAndCollectConnection @deprecated(reason: "Use the searchForSainsburysStores query instead.")
 
   """Get a Sainsbury's Store"""
-  sainsburysStore(filter: SainsburysStoreFilter!): SainsburysStore
+  sainsburysStore(
+    """This is used to find a specific store"""
+    filter: SainsburysStoreFilter!
+
+    """
+    The date on which to apply the filter. This will not affect children fields
+    """
+    date: Date
+  ): SainsburysStore
 
   """
   Get all Sainsbury's Stores, optionally restricted by a number of filters
@@ -1195,7 +1336,7 @@ type Query {
   ): SainsburysStoreConnection!
 
   """Get a Fulfilment Location by a filter"""
-  fulfilmentLocation(filter: FulfilmentLocationFilter!): FulfilmentLocation
+  fulfilmentLocation(filter: FulfilmentLocationFilter!): FulfilmentLocation @deprecated(reason: "FulfilmentLocation is being removed. Use the sainsburysStore query instead.")
 
   """
   Get all Fulfilment Locations, optionally restricted by a number of filters
@@ -1215,13 +1356,13 @@ type Query {
 
     """Not implemented"""
     last: Int
-  ): FulfilmentLocationConnection
+  ): FulfilmentLocationConnection @deprecated(reason: "FulfilmentLocation is being removed. Use the sainsburysStores query instead.")
 
   """
   Fuzzy search for Fulfilment Locations on conjoined:
   * code
   * name
-  
+
   For example:
   "Badger" or "666"
   """
@@ -1239,7 +1380,7 @@ type Query {
 
     """Not implemented"""
     last: Int
-  ): FulfilmentLocationConnection
+  ): FulfilmentLocationConnection @deprecated(reason: "FulfilmentLocation is being removed. Use the searchForSainsburysStore query instead.")
 }
 
 """Info about the currently logged in user"""
@@ -1267,8 +1408,11 @@ enum Zone {
 }
 
 input UpdateCacCollectionProviderMutationInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
 
   """The road speed percentage"""
   collectionProvider: CollectionProvider!
@@ -1282,14 +1426,17 @@ input UpdateCacCollectionProviderMutationInput {
   effectiveTo: Date
 }
 
-type UpdateCacCollectionProviderMutationPayload {
+type UpdateCacCollectionProviderMutationResponse {
   """The updated attribute"""
   updatedAttribute: StringChangeLog!
 }
 
 input UpdateCacSameDayEnabledMutationInput {
-  """Sainsbury's Store ID to amend"""
-  locationId: ID!
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
 
   """The road speed percentage"""
   sameDayEnabled: Boolean!
@@ -1303,18 +1450,21 @@ input UpdateCacSameDayEnabledMutationInput {
   effectiveTo: Date
 }
 
-type UpdateCacSameDayEnabledMutationPayload {
+type UpdateCacSameDayEnabledMutationResponse {
   """The updated attribute"""
   updatedAttribute: BooleanChangeLog!
 }
 
 """Input type for opening hours"""
-input UpdateCacOpeningHoursForWeekInput {
+input UpdateCacOpeningHoursForWeekMutationInput {
   """The opening hours to be amended"""
   openingHoursForWeek: [DayTimeWindowInput!]!
 
-  """The Fulfilment Location Id to amend"""
-  locationId: ID!
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
 
   """Date from which the opening hours will apply"""
   effectiveFrom: Date!
@@ -1323,14 +1473,17 @@ input UpdateCacOpeningHoursForWeekInput {
   effectiveTo: Date
 }
 
-type UpdateCacOpeningHoursForWeekMutationPayload {
+type UpdateCacOpeningHoursForWeekMutationResponse {
   """The updated attribute"""
   updatedAttribute: OpeningHoursForWeekChangeLog!
 }
 
 input UpdateCacDefaultSlotCapacityMutationInput {
   """Click and collect ID to amend"""
-  locationId: ID!
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
 
   """The default slot capacity of new slots"""
   defaultSlotCapacity: Int!
@@ -1344,15 +1497,101 @@ input UpdateCacDefaultSlotCapacityMutationInput {
   effectiveTo: Date
 }
 
-type UpdateCacDefaultSlotCapacityMutationPayload {
+type UpdateCacDefaultSlotCapacityMutationResponse {
   """The updated attribute"""
   updatedAttribute: IntChangeLog!
+}
+
+input UpdateCacTravelTimeMinutesMutationInput {
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
+
+  """
+  The travel time from fulfilling store to collection location in minutes
+  """
+  travelTimeMinutes: Int!
+
+  """Date when the travel time will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the travel time will no longer be applicable"""
+  effectiveTo: Date
+}
+
+type UpdateCacTravelTimeMinutesMutationResponse {
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+input CollectionWindowInput {
+  id: ID!
+  maxVans: Int!
+  start: Time!
+  end: Time!
+}
+
+input CollectionWindowsForDayInput {
+  dayOfWeek: DayOfWeek!
+  collectionWindows: [CollectionWindowInput!]!
+}
+
+input UpdateCacCollectionWindowsForWeekMutationInput {
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
+
+  """The collection windows for the collection location"""
+  collectionWindowsForWeek: [CollectionWindowsForDayInput!]!
+
+  """Date when the collection windows will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the collection windows will no longer be applicable"""
+  effectiveTo: Date
+}
+
+type UpdateCacCollectionWindowsForWeekMutationResponse {
+  """The updated attribute"""
+  updatedAttribute: CollectionWindowsForWeekChangeLog!
+}
+
+input UpdateCacFulfilmentTypeMutationInput {
+  """Click and collect ID to amend"""
+  locationId: ID
+
+  """Click and collect ID to amend"""
+  entityId: ID
+
+  """The fulfilment type of the click and collect location"""
+  type: ClickAndCollectType!
+
+  """Date when the fulfilment type will be applicable from"""
+  effectiveFrom: Date!
+
+  """Optional date when the fulfilment type will no longer be applicable"""
+  effectiveTo: Date
+}
+
+type UpdateCacFulfilmentTypeMutationResponse {
+  """The updated attribute"""
+  updatedAttribute: StringChangeLog!
 }
 
 """
 Attributes for a click and collect location. These should be for a particular date
 """
 type ClickAndCollectAttributes implements AttributeLink {
+  """Internal use only"""
+  entityId: FlrsID!
+
+  """Date will default to todays date if not provided"""
+  date: Date!
+
   """
   The opening hours for this date - i.e. when are customers permitted to walk up and ask for their shopping without upsetting a colleague
   """
@@ -1363,12 +1602,21 @@ type ClickAndCollectAttributes implements AttributeLink {
   type: ClickAndCollectType
 
   """The location which picks the goods for this collection location"""
-  fulfilledBy: SainsburysStore
-  locationId: String!
-  date: Date
+  fulfilledBy: SainsburysStore @deprecated(reason: "This is to be replaced by always querying for a sainsburys store. You can query a store the get the C&C location via sainsburysStore.services.clickAndCollect")
   collectionProvider: CollectionProvider
   sameDayEnabled: Boolean
   defaultSlotCapacity: Int!
+
+  """
+  The time taken to travel from the fulfilling store to the collection location in minutes
+  """
+  travelTimeMinutes: Int!
+
+  """The time interval at which orders can be collected"""
+  collectionWindows: [CollectionWindow!]!
+
+  """The collection windows for each day of a Sainsburys week"""
+  collectionWindowsForWeek: [CollectionWindowsForDay!]!
 }
 
 enum CollectionProvider {
@@ -1383,15 +1631,23 @@ enum CacAttributeNames {
   COLLECTION_PROVIDER
   SAME_DAY_ENABLED
   OPENING_HOURS_FOR_WEEK
+  DEFAULT_SLOT_CAPACITY
+  FULFILMENT_TYPE
 }
 
 type ClickAndCollectAttributesWithChanges implements AttributeLink {
+  """Date will default to todays date if not provided"""
+  date: Date!
   collectionProvider: CollectionProviderWithChanges
   sameDayEnabled: BooleanWithChanges
   openingHoursForWeek: OpeningHoursForWeekWithChanges
   defaultSlotCapacity: IntWithChanges
-  locationId: String!
-  date: Date
+  travelTimeMinutes: IntWithChanges
+  collectionWindowsForWeek: CollectionWindowsForWeekWithChanges
+  type: FulfilmentTypeWithChanges
+
+  """Internal use only"""
+  entityId: FlrsID!
 }
 
 type CollectionProviderChange implements AttributeChange {
@@ -1422,8 +1678,37 @@ type OpeningHoursForWeekWithChanges {
   upcomingChanges(limit: Int): [OpeningHoursForWeekChange!]!
 }
 
+type CollectionWindow {
+  id: ID!
+  maxVans: Int!
+  start: Time!
+  end: Time!
+}
+
+type CollectionWindowsForDay {
+  dayOfWeek: DayOfWeek!
+  collectionWindows: [CollectionWindow!]!
+}
+
+type CollectionWindowsForWeekChange implements AttributeChange {
+  id: ID
+  value: [CollectionWindowsForDay!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type CollectionWindowsForWeekWithChanges {
+  value: [CollectionWindowsForDay!]!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [CollectionWindowsForWeekChange!]!
+}
+
 """Log of all changes made to click and collect attributes"""
 type ClickAndCollectAttributesChangeLog implements AttributeLink {
+  """Date will default to todays date if not provided"""
+  date: Date
+
   """
   Changelog for the same day enabled flag for the click and collect location
   """
@@ -1441,8 +1726,18 @@ type ClickAndCollectAttributesChangeLog implements AttributeLink {
   Changelog for the default slot capacity for the click and collect location
   """
   defaultSlotCapacity: [IntChangeLog!]
-  locationId: String!
-  date: Date
+
+  """Changelog for the travel time for the click and collect location"""
+  travelTimeMinutes: [IntChangeLog!]
+
+  """Changelog for the collection windows of the click and collect location"""
+  collectionWindowsForWeek: [CollectionWindowsForWeekChangeLog!]
+
+  """Changelog for the fulfilment type of the click and collect location"""
+  type: [FulfilmentTypeChangeLog!]
+
+  """Internal use only"""
+  entityId: FlrsID!
 }
 
 type CollectionProviderChangeLog implements ChangeLog {
@@ -1493,6 +1788,30 @@ type OpeningHoursForWeekChangeEvent implements AttributeChangeEvent {
   doneAt: Date!
 }
 
+type CollectionWindowsForWeekChangeLog implements ChangeLog {
+  id: ID!
+  value: [CollectionWindowsForDay!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  isUndone: Boolean!
+  deletedAt: Date
+  deletedBy: String
+}
+
+type CollectionWindowsForWeekChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: [CollectionWindowsForDay!]!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
+}
+
 """Log of all changes made to store attributes"""
 type ClickAndCollectAttributesEventHistory implements AttributeLink {
   """
@@ -1514,8 +1833,63 @@ type ClickAndCollectAttributesEventHistory implements AttributeLink {
   Change event history for the opening hours of the click and collect location
   """
   openingHoursForWeek: [OpeningHoursForWeekChangeEvent!]
-  locationId: String!
+
+  """
+  Change event history for the travel time of the click and collect location
+  """
+  travelTimeMinutes: [IntChangeEvent!]
+
+  """
+  Change event history for the collection windows of the click and collect location
+  """
+  collectionWindowsForWeek: [CollectionWindowsForWeekChangeEvent!]
+
+  """
+  Change event history for the fulfilmentType of the click and collect location
+  """
+  type: [FulfilmentTypeChangeEvent!]
+
+  """Internal use only"""
+  entityId: FlrsID!
   date: Date
+}
+
+type FulfilmentTypeChange implements AttributeChange {
+  id: ID
+  value: ClickAndCollectType!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  isGap: Boolean!
+}
+
+type FulfilmentTypeWithChanges {
+  value: ClickAndCollectType!
+  currentChange: CurrentChange
+  upcomingChanges(limit: Int): [FulfilmentTypeChange!]!
+}
+
+type FulfilmentTypeChangeLog implements ChangeLog {
+  id: ID!
+  value: ClickAndCollectType!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  createdBy: String
+  createdAt: Date!
+  isDeleted: Boolean!
+  deletedAt: Date
+  deletedBy: String
+  isUndone: Boolean!
+}
+
+type FulfilmentTypeChangeEvent implements AttributeChangeEvent {
+  id: ID!
+  attributeChangeId: ID!
+  eventType: AttributeEventType!
+  value: ClickAndCollectType!
+  effectiveFrom: Date!
+  effectiveTo: Date!
+  doneBy: String
+  doneAt: Date!
 }
 
 input ClickAndCollectFilter {
@@ -1536,12 +1910,12 @@ type ClickAndCollectConnectionEdge {
 type ClickAndCollect implements FulfilmentLocation {
   name: String!
   drsId: String!
-  id: ID!
+  id: FlrsID!
 
   """
   Attributes associated with this click and collect location. If no date provided, the attributes will be for today
   """
-  attributes(date: Date): ClickAndCollectAttributes
+  attributes(date: Date): ClickAndCollectAttributes!
 
   """Change log of all changes made to the attribute"""
   attributesChangeLog: ClickAndCollectAttributesChangeLog
@@ -1568,12 +1942,290 @@ enum CacheControlScope {
   PRIVATE
 }
 
-type OrderPickingCapacityMutationPayload {
+type HomeDeliveryService {
+  """This is the flrsId of the home delivery service"""
+  id: FlrsID!
+
+  """
+  The mutable attributes assigned to this home delivery service
+  Date will default to todays date if not provided
+  """
+  attributes(date: Date): HomeDeliveryServiceAttributes!
+  attributesChangeLog: HomeDeliveryServiceAttributesChangeLog
+  attributesWithChanges(
+    date: Date
+
+    """
+    If gaps returning to the default value between/after temporary attributes should be included in the results.
+    """
+    includeGaps: Boolean
+  ): HomeDeliveryServiceAttributesWithChanges
+  attributesEventHistory: HomeDeliveryServiceAttributesEventHistory
+}
+
+"""Input type for mutating alcohol buffer time"""
+input UpdateAlcoholBufferTimeInput {
+  """Location ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """The alcohol buffer in minutes"""
+  alcoholBufferTime: Int!
+
+  """Date when the alcohol buffer time will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the alcohol buffer time will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateAlcoholBufferTimeMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating alcohol restricted departure enabled"""
+input UpdateAlcoholRestrictedDepartureEnabledInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """Flag to enable alcohol restricted departure"""
+  alcoholRestrictedDepartureEnabled: Boolean!
+
+  """Date when alcohol restricted departure will be enabled from"""
+  effectiveFrom: Date!
+
+  """Optional date when the restriction will no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a alcohol restricted departure enabled update"""
+type UpdateAlcoholRestrictedDepartureEnabledMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+input UpdateOverweightAllowancePercentageInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """The overweight allowance in percentages"""
+  overweightAllowancePercentage: Int!
+
+  """Date when the overweight allowance percentage will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the overweight allowance percentage will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+"""
+Response returned from an overweight allowance percentage update mutation
+"""
+type UpdateOverweightAllowancePercentageMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: IntChangeLog!
+}
+
+"""Input type for mutating same day enabled"""
+input UpdateSameDayEnabledInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """Flag to enable same day"""
+  sameDayEnabled: Boolean!
+
+  """Date when same day will be enabled from"""
+  effectiveFrom: Date!
+
+  """Optional date when same day no longer be applicable"""
+  effectiveTo: Date
+}
+
+"""Response returned from a same day enabled update"""
+type UpdateSameDayEnabledMutationResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: BooleanChangeLog!
+}
+
+input UpdateOrderWeightModifierInput {
+  """Sainsbury's Store ID to amend"""
+  locationId: ID
+
+  """entity ID to amend"""
+  entityId: ID
+
+  """The updated order weight modifier between 0.5 and 2"""
+  orderWeightModifier: Float!
+
+  """Date when the default predicted order weight will be applicable from"""
+  effectiveFrom: Date!
+
+  """
+  Optional date when the default predicted order weight will no longer be applicable
+  """
+  effectiveTo: Date
+}
+
+type UpdateOrderWeightModifierResponse implements UpdateAttributeMutationResponse {
+  """The updated location"""
+  location: SainsburysStore!
+
+  """The updated attribute"""
+  updatedAttribute: FloatChangeLog!
+}
+
+type HomeDeliveryServiceAttributes {
+  """Internal use only"""
+  entityId: FlrsID!
+
+  """Date will default to todays date if not provided"""
+  date: Date!
+
+  """
+  The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours. Unit is minutes
+  """
+  alcoholBufferTime: Int
+
+  """
+  The flag to check if alcohol restricted departure is enabled for a particular day.
+  """
+  alcoholRestrictedDepartureEnabled: Boolean
+
+  """
+  The overweight allowance percentage, adds additional payload on top of minimum payload
+  """
+  overweightAllowancePercentage: Int
+
+  """The flag to check if same day is enabled for a particular day."""
+  sameDayEnabled: Boolean
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: Float
+}
+
+type HomeDeliveryServiceAttributesWithChanges {
+  """Internal use only"""
+  entityId: FlrsID!
+
+  """Date will default to todays date if not provided"""
+  date: Date!
+
+  """The flag to check if same day is enabled for a particular day."""
+  sameDayEnabled: BooleanWithChanges
+
+  """
+  The flag to check if alcohol restricted departure is enabled for a particular day.
+  """
+  alcoholRestrictedDepartureEnabled: BooleanWithChanges
+
+  """
+  The alcohol buffer time, specifies the period of time after the start of alcohol licensing hours
+  """
+  alcoholBufferTime: IntWithChanges
+
+  """
+  The overweight allowance percentage, adds additional payload on top of minimum payload
+  """
+  overweightAllowancePercentage: IntWithChanges
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: FloatWithChanges
+}
+
+"""Log of all changes made to store attributes"""
+type HomeDeliveryServiceAttributesChangeLog {
+  """Internal use only"""
+  entityId: FlrsID!
+
+  """Date will default to todays date if not provided"""
+  date: Date
+
+  """Changelog for the alcohol buffer time of the store"""
+  alcoholBufferTime: [IntChangeLog!]
+
+  """Changelog for the alcohol restricted departure flag for the store"""
+  alcoholRestrictedDepartureEnabled: [BooleanChangeLog!]
+
+  """Changelog for the overweight allowance percentage for the store"""
+  overweightAllowancePercentage: [IntChangeLog!]
+
+  """Changelog for the same day enabled flag for the store"""
+  sameDayEnabled: [BooleanChangeLog!]
+
+  """
+  Changelog for the modifier to apply to order weights between 0.5 and 2 (float)
+  """
+  orderWeightModifier: [FloatChangeLog!]
+}
+
+"""Log of all changes made to store attributes"""
+type HomeDeliveryServiceAttributesEventHistory {
+  """Internal use only"""
+  entityId: FlrsID!
+
+  """Change event history for the alcohol buffer time of the store"""
+  alcoholBufferTime: [IntChangeEvent!]
+
+  """
+  Change event history for the alcohol restricted departure flag of the store
+  """
+  alcoholRestrictedDepartureEnabled: [BooleanChangeEvent!]
+
+  """
+  Change event history for the overweight allowance percentage of the store
+  """
+  overweightAllowancePercentage: [IntChangeEvent!]
+
+  """Change event history for the same day enabled flag of the store"""
+  sameDayEnabled: [BooleanChangeEvent!]
+
+  """The modifier to apply to order weights between 0.5 and 2 (float)"""
+  orderWeightModifier: [FloatChangeEvent!]
+}
+
+enum HomeDeliveryServiceAttributeNames {
+  ALCOHOL_BUFFER_TIME
+  ALCOHOL_RESTRICTED_DEPARTURE_ENABLED
+  SAME_DAY_ENABLED
+  OVERWEIGHT_ALLOWANCE_PERCENTAGE
+  ORDER_PICKING_CAPACITY
+  ORDER_WEIGHT_MODIFIER
+}
+
+type OrderPickingCapacityMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 }
 
-type CollectionPickingCapacityMutationPayload {
+type CollectionPickingCapacityMutationResponse {
   """The updated location"""
   location: SainsburysStore!
 }
@@ -1595,7 +2247,7 @@ input DayTimeWindowInput {
   dayOfWeek: DayOfWeek!
 }
 
-type AlcoholLicensingHoursMutationPayload {
+type AlcoholLicensingHoursMutationResponse {
   """The updated location"""
   location: FulfilmentLocation!
 }
@@ -1649,14 +2301,14 @@ input UpdateCollectionPickingCapacityInput {
 type SainsburysStore implements FulfilmentLocation {
   code: String!
   name: String!
-  id: ID!
+  id: FlrsID!
   placeId: String
-  propositions(date: Date): [FulfilmentLocation!]
+  propositions(date: Date): [FulfilmentLocation!] @deprecated(reason: "Please use the services field instead.")
 
   """
   Attributes associated with this Sainsburys store. If no date provided, the attributes will be for today
   """
-  attributes(date: Date): SainsburysStoreAttributes
+  attributes(date: Date): SainsburysStoreAttributes!
 
   """Change log of all changes made to the attribute"""
   attributesChangeLog: SainsburysStoreAttributesChangeLog
@@ -1676,6 +2328,11 @@ type SainsburysStore implements FulfilmentLocation {
     includeGaps: Boolean
   ): SainsburysStoreAttributesWithChanges
 
+  """
+  Services provided by this store such as home delivery and click and collect.
+  """
+  services: SainsburysStoreServices
+
   """The zone this store belongs to"""
   zone: Zone
   type: FulfilmentType!
@@ -1684,6 +2341,11 @@ type SainsburysStore implements FulfilmentLocation {
 input SainsburysStoreFilter {
   code: String
   placeId: String
+
+  """
+  This can be a Store or any services' flrsId.
+  The associated Store will be returned.
+  """
   flrsId: String
 }
 
@@ -1715,7 +2377,7 @@ type FulfilmentLocationConnectionEdge {
 
 interface FulfilmentLocation {
   name: String!
-  id: ID!
+  id: FlrsID!
 }
 
 enum FulfilmentType {
@@ -1723,8 +2385,9 @@ enum FulfilmentType {
   CLICK_AND_COLLECT
 }
 
+"""data to pass to attribute field from parent"""
 interface AttributeLink {
-  locationId: String!
+  entityId: FlrsID!
   date: Date
 }
 
@@ -1746,6 +2409,11 @@ Date custom scalar type follows ISO 8601 Date format "YYYY-MM-DD"
 """
 scalar Date
 
+"""
+This id is unique to FLRS. It contains a unique identifier for an entity aswell as some metadata used internally.
+"""
+scalar FlrsID
+
 """Representation of a time in 24H format (e.g. 19:00)."""
 scalar Time
 
@@ -1766,7 +2434,7 @@ enum DayOfWeek {
 """The possible types of Click and Collect"""
 enum ClickAndCollectType {
   """Collect from a Van in a Carpark"""
-  LINES_AND_SIGNS
+  FULFIL_FROM_VAN
 
   """Collect from somewhere in the store"""
   FULFIL_FROM_ROOM
