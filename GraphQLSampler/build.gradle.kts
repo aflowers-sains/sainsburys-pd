@@ -40,6 +40,7 @@ tasks.generateJava {
     packageName = "uk.co.sainsburys.graphqlsampler.codegen"
     generateClientv2 = true
     trackInputFieldSet = true
+    addDeprecatedAnnotation = true
     typeMapping.put("Time", "java.time.LocalTime")
     typeMapping.put("Date", "java.time.LocalDate")
     typeMapping.put("FlrsID", "java.lang.String")
